@@ -11,6 +11,8 @@ import de.medizininformatik.ccdl2deltalake.model.common.Comparator;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
+import static java.util.Objects.requireNonNullElse;
+
 /**
  * A single, atomic criterion in a Structured Query.
  * Deserialized from the CCDL JSON format (same as sq2cql input).
@@ -23,15 +25,17 @@ public interface Criterion {
         @JsonProperty("context") TermCode context,
         @JsonProperty("termCodes") List<TermCode> termCodes,
         @JsonProperty("valueFilter") ObjectNode valueFilter,
-        @JsonProperty("timeRestriction") TimeRestriction timeRestriction
+        @JsonProperty("timeRestriction") TimeRestriction timeRestriction,
+        @JsonProperty("attributeFilters") List<AttributeFilter> attributeFilters
     ) {
         var concept = ContextualConcept.of(
             context != null ? context : TermCode.of("", "", ""),
             termCodes != null ? termCodes : List.of()
         );
+        var attrs = requireNonNullElse(attributeFilters, List.<AttributeFilter>of());
 
         if (valueFilter == null) {
-            return ConceptCriterion.of(concept, timeRestriction);
+            return ConceptCriterion.of(concept, timeRestriction, attrs);
         }
 
         var type = valueFilter.get("type").asText();
@@ -41,18 +45,18 @@ public interface Criterion {
                 var value = valueFilter.get("value").decimalValue();
                 var unitNode = valueFilter.get("unit");
                 yield unitNode == null
-                    ? NumericCriterion.of(concept, comparator, value, timeRestriction)
+                    ? NumericCriterion.of(concept, comparator, value, timeRestriction, attrs)
                     : NumericCriterion.of(concept, comparator, value,
-                        unitNode.get("code").asText(), timeRestriction);
+                        unitNode.get("code").asText(), timeRestriction, attrs);
             }
             case "quantity-range" -> {
                 var lower = valueFilter.get("minValue").decimalValue();
                 var upper = valueFilter.get("maxValue").decimalValue();
                 var unitNode = valueFilter.get("unit");
                 yield unitNode == null
-                    ? RangeCriterion.of(concept, lower, upper, timeRestriction)
+                    ? RangeCriterion.of(concept, lower, upper, timeRestriction, attrs)
                     : RangeCriterion.of(concept, lower, upper,
-                        unitNode.get("code").asText(), timeRestriction);
+                        unitNode.get("code").asText(), timeRestriction, attrs);
             }
             case "concept" -> {
                 var selectedConcepts = valueFilter.get("selectedConcepts");
@@ -62,7 +66,7 @@ public interface Criterion {
                         n.get("code").asText(),
                         n.has("display") ? n.get("display").asText() : ""))
                     .toList();
-                yield ValueSetCriterion.of(concept, concepts, timeRestriction);
+                yield ValueSetCriterion.of(concept, concepts, timeRestriction, attrs);
             }
             default -> throw new IllegalArgumentException("Unknown valueFilter type: " + type);
         };
@@ -79,4 +83,6 @@ public interface Criterion {
     ContextualConcept getConcept();
 
     TimeRestriction getTimeRestriction();
+
+    List<AttributeFilter> getAttributeFilters();
 }

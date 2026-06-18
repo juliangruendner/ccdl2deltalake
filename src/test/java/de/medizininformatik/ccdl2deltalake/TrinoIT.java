@@ -171,6 +171,20 @@ class TrinoIT {
 
     @Test
     @Order(8)
+    void referenceAttributeFilter_specimenWithDiagnosis_returnsPatients() throws Exception {
+        var json = java.nio.file.Files.readString(
+            java.nio.file.Path.of("src/test/resources/ccdl/spec-cond.json"));
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var query = mapper.readValue(json, StructuredQuery.class);
+        var sql = SqlWriter.write("it_ref_attr_specimen_condition", translator.toSql(query));
+
+        var results = executeQuery(sql);
+        System.out.println("Specimen+E13.9 patients: " + results);
+        assertThat(results).isNotEmpty();
+    }
+
+    @Test
+    @Order(9)
     void joinedTermCode_medicationAdministration_returnsPatients() throws Exception {
         var query = StructuredQuery.of(List.of(
             List.of(ConceptCriterion.of(ContextualConcept.of(MED_CTX, List.of(HEPARIN))))
@@ -183,7 +197,7 @@ class TrinoIT {
     }
 
     @Test
-    @Order(9)
+    @Order(10)
     void jsonInput_endToEnd() throws Exception {
         var json = """
             {

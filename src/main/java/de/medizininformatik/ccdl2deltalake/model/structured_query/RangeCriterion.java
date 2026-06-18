@@ -8,13 +8,11 @@ import de.medizininformatik.ccdl2deltalake.model.TermCode;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
-/**
- * Selects patients with a resource whose numeric value falls within [lowerBound, upperBound].
- */
 public final class RangeCriterion extends AbstractCriterion {
 
     private final BigDecimal lowerBound;
@@ -22,21 +20,34 @@ public final class RangeCriterion extends AbstractCriterion {
     private final String unit;
 
     private RangeCriterion(ContextualConcept concept, BigDecimal lowerBound, BigDecimal upperBound,
-                            String unit, TimeRestriction timeRestriction) {
-        super(concept, timeRestriction);
+                            String unit, TimeRestriction timeRestriction,
+                            List<AttributeFilter> attributeFilters) {
+        super(concept, timeRestriction, attributeFilters);
         this.lowerBound = requireNonNull(lowerBound);
         this.upperBound = requireNonNull(upperBound);
         this.unit = unit;
     }
 
-    public static RangeCriterion of(ContextualConcept concept, BigDecimal lowerBound, BigDecimal upperBound,
-                                    TimeRestriction timeRestriction) {
-        return new RangeCriterion(concept, lowerBound, upperBound, null, timeRestriction);
+    public static RangeCriterion of(ContextualConcept concept, BigDecimal lowerBound,
+                                    BigDecimal upperBound, TimeRestriction timeRestriction) {
+        return new RangeCriterion(concept, lowerBound, upperBound, null, timeRestriction, List.of());
     }
 
-    public static RangeCriterion of(ContextualConcept concept, BigDecimal lowerBound, BigDecimal upperBound,
-                                    String unit, TimeRestriction timeRestriction) {
-        return new RangeCriterion(concept, lowerBound, upperBound, unit, timeRestriction);
+    public static RangeCriterion of(ContextualConcept concept, BigDecimal lowerBound,
+                                    BigDecimal upperBound, String unit, TimeRestriction timeRestriction) {
+        return new RangeCriterion(concept, lowerBound, upperBound, unit, timeRestriction, List.of());
+    }
+
+    public static RangeCriterion of(ContextualConcept concept, BigDecimal lowerBound,
+                                    BigDecimal upperBound, TimeRestriction timeRestriction,
+                                    List<AttributeFilter> attributeFilters) {
+        return new RangeCriterion(concept, lowerBound, upperBound, null, timeRestriction, attributeFilters);
+    }
+
+    public static RangeCriterion of(ContextualConcept concept, BigDecimal lowerBound,
+                                    BigDecimal upperBound, String unit, TimeRestriction timeRestriction,
+                                    List<AttributeFilter> attributeFilters) {
+        return new RangeCriterion(concept, lowerBound, upperBound, unit, timeRestriction, attributeFilters);
     }
 
     @Override
@@ -61,7 +72,7 @@ public final class RangeCriterion extends AbstractCriterion {
             }
 
             var expanded = ctx.expandTermCode(ctc).toList();
-            subQueries.add(buildTermCodeSql(catalog, mapping, expanded, additionalWhere.toString()));
+            subQueries.add(buildTermCodeSql(catalog, mapping, expanded, additionalWhere.toString(), ctx));
         }
 
         if (subQueries.isEmpty()) {

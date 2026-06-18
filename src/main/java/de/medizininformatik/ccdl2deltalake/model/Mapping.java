@@ -4,28 +4,15 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.medizininformatik.ccdl2deltalake.model.filter.DateFilter;
+import de.medizininformatik.ccdl2deltalake.model.filter.ReferenceAttributeFilterMapping;
 import de.medizininformatik.ccdl2deltalake.model.filter.TermCodeFilter;
 import de.medizininformatik.ccdl2deltalake.model.filter.ValueFilter;
 
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
-/**
- * Maps a medical concept (TermCode in a context) to a Delta Lake table and its relevant columns.
- *
- * <p>Example JSON:
- * <pre>{@code
- * {
- *   "context":       { "system": "fdpg.mii.cds", "code": "Diagnose", "display": "Diagnose" },
- *   "key":           { "system": "http://snomed.info/sct", "code": "37796009", "display": "Migraine" },
- *   "tableName":     "condition",
- *   "patientRefPath":"subject.reference",
- *   "termCodeFilter":{ "arrayPath": "code.coding" },
- *   "dateFilter":    { "path": "recordeddate", "type": "DATE" }
- * }
- * }</pre>
- */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record Mapping(
     TermCode context,
@@ -34,7 +21,8 @@ public record Mapping(
     String patientRefPath,
     TermCodeFilter termCodeFilter,
     ValueFilter valueFilter,
-    DateFilter dateFilter
+    DateFilter dateFilter,
+    List<ReferenceAttributeFilterMapping> referenceAttributeFilters
 ) {
 
     @JsonCreator
@@ -45,7 +33,8 @@ public record Mapping(
         @JsonProperty("patientRefPath") String patientRefPath,
         @JsonProperty("termCodeFilter") TermCodeFilter termCodeFilter,
         @JsonProperty("valueFilter") ValueFilter valueFilter,
-        @JsonProperty("dateFilter") DateFilter dateFilter
+        @JsonProperty("dateFilter") DateFilter dateFilter,
+        @JsonProperty("referenceAttributeFilters") List<ReferenceAttributeFilterMapping> referenceAttributeFilters
     ) {
         return new Mapping(
             requireNonNull(context, "missing: context"),
@@ -54,7 +43,8 @@ public record Mapping(
             requireNonNull(patientRefPath, "missing: patientRefPath"),
             requireNonNull(termCodeFilter, "missing: termCodeFilter"),
             valueFilter,
-            dateFilter
+            dateFilter,
+            referenceAttributeFilters != null ? List.copyOf(referenceAttributeFilters) : List.of()
         );
     }
 
@@ -68,5 +58,11 @@ public record Mapping(
 
     public Optional<DateFilter> getDateFilter() {
         return Optional.ofNullable(dateFilter);
+    }
+
+    public Optional<ReferenceAttributeFilterMapping> findRefAttributeFilter(String attributeCode) {
+        return referenceAttributeFilters.stream()
+            .filter(r -> r.attributeCode().equals(attributeCode))
+            .findFirst();
     }
 }

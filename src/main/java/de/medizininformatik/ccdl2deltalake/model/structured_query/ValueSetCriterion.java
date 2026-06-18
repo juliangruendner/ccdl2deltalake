@@ -12,23 +12,25 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
-/**
- * Selects patients with a resource whose coded value is one of the selected concepts.
- * The valueFilter in the mapping must be a QuantityValueFilter where unitSqlPath points to the code field.
- */
 public final class ValueSetCriterion extends AbstractCriterion {
 
     private final List<TermCode> selectedConcepts;
 
     private ValueSetCriterion(ContextualConcept concept, List<TermCode> selectedConcepts,
-                               TimeRestriction timeRestriction) {
-        super(concept, timeRestriction);
+                               TimeRestriction timeRestriction, List<AttributeFilter> attributeFilters) {
+        super(concept, timeRestriction, attributeFilters);
         this.selectedConcepts = List.copyOf(requireNonNull(selectedConcepts));
     }
 
     public static ValueSetCriterion of(ContextualConcept concept, List<TermCode> selectedConcepts,
                                        TimeRestriction timeRestriction) {
-        return new ValueSetCriterion(concept, selectedConcepts, timeRestriction);
+        return new ValueSetCriterion(concept, selectedConcepts, timeRestriction, List.of());
+    }
+
+    public static ValueSetCriterion of(ContextualConcept concept, List<TermCode> selectedConcepts,
+                                       TimeRestriction timeRestriction,
+                                       List<AttributeFilter> attributeFilters) {
+        return new ValueSetCriterion(concept, selectedConcepts, timeRestriction, attributeFilters);
     }
 
     @Override
@@ -43,7 +45,6 @@ public final class ValueSetCriterion extends AbstractCriterion {
                 .orElseThrow(() -> new TranslationException(
                     "ValueSet criterion requires a valueFilter in mapping for: " + ctc));
 
-            // Group selected concepts by system and build a filter per system
             var bySystem = selectedConcepts.stream()
                 .collect(Collectors.groupingBy(TermCode::system));
 
@@ -51,12 +52,11 @@ public final class ValueSetCriterion extends AbstractCriterion {
                 String inClause = entry.getValue().stream()
                     .map(c -> "'" + escape(c.code()) + "'")
                     .collect(Collectors.joining(", "));
-                // Use the unitSqlPath as the value code column
                 return valueFilter.unitSqlPath("t") + " IN (" + inClause + ")";
             }).collect(Collectors.joining("\n  OR "));
 
             var expanded = ctx.expandTermCode(ctc).toList();
-            subQueries.add(buildTermCodeSql(catalog, mapping, expanded, valueConditions));
+            subQueries.add(buildTermCodeSql(catalog, mapping, expanded, valueConditions, ctx));
         }
 
         if (subQueries.isEmpty()) {

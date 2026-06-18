@@ -9,14 +9,11 @@ import de.medizininformatik.ccdl2deltalake.model.common.Comparator;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
-/**
- * Selects patients with a resource whose numeric value satisfies a comparator condition.
- * Example: Observation (Hemoglobin) with valueQuantity.value > 12.5 g/dL
- */
 public final class NumericCriterion extends AbstractCriterion {
 
     private final Comparator comparator;
@@ -24,21 +21,34 @@ public final class NumericCriterion extends AbstractCriterion {
     private final String unit;
 
     private NumericCriterion(ContextualConcept concept, Comparator comparator, BigDecimal value,
-                              String unit, TimeRestriction timeRestriction) {
-        super(concept, timeRestriction);
+                              String unit, TimeRestriction timeRestriction,
+                              List<AttributeFilter> attributeFilters) {
+        super(concept, timeRestriction, attributeFilters);
         this.comparator = requireNonNull(comparator);
         this.value = requireNonNull(value);
         this.unit = unit;
     }
 
-    public static NumericCriterion of(ContextualConcept concept, Comparator comparator, BigDecimal value,
-                                      TimeRestriction timeRestriction) {
-        return new NumericCriterion(concept, comparator, value, null, timeRestriction);
+    public static NumericCriterion of(ContextualConcept concept, Comparator comparator,
+                                      BigDecimal value, TimeRestriction timeRestriction) {
+        return new NumericCriterion(concept, comparator, value, null, timeRestriction, List.of());
     }
 
-    public static NumericCriterion of(ContextualConcept concept, Comparator comparator, BigDecimal value,
-                                      String unit, TimeRestriction timeRestriction) {
-        return new NumericCriterion(concept, comparator, value, unit, timeRestriction);
+    public static NumericCriterion of(ContextualConcept concept, Comparator comparator,
+                                      BigDecimal value, String unit, TimeRestriction timeRestriction) {
+        return new NumericCriterion(concept, comparator, value, unit, timeRestriction, List.of());
+    }
+
+    public static NumericCriterion of(ContextualConcept concept, Comparator comparator,
+                                      BigDecimal value, TimeRestriction timeRestriction,
+                                      List<AttributeFilter> attributeFilters) {
+        return new NumericCriterion(concept, comparator, value, null, timeRestriction, attributeFilters);
+    }
+
+    public static NumericCriterion of(ContextualConcept concept, Comparator comparator,
+                                      BigDecimal value, String unit, TimeRestriction timeRestriction,
+                                      List<AttributeFilter> attributeFilters) {
+        return new NumericCriterion(concept, comparator, value, unit, timeRestriction, attributeFilters);
     }
 
     @Override
@@ -63,7 +73,7 @@ public final class NumericCriterion extends AbstractCriterion {
             }
 
             var expanded = ctx.expandTermCode(ctc).toList();
-            subQueries.add(buildTermCodeSql(catalog, mapping, expanded, additionalWhere.toString()));
+            subQueries.add(buildTermCodeSql(catalog, mapping, expanded, additionalWhere.toString(), ctx));
         }
 
         if (subQueries.isEmpty()) {

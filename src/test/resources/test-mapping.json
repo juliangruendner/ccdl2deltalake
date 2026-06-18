@@ -119,6 +119,54 @@
   },
   {
     "context": {
+      "system": "fdpg.mii.cds",
+      "code": "Diagnose",
+      "display": "Diagnose",
+      "version": "1.0.0"
+    },
+    "key": {
+      "system": "http://fhir.de/CodeSystem/bfarm/icd-10-gm",
+      "code": "E13.9",
+      "display": "Sonstiger näher bezeichneter Diabetes mellitus: Ohne Komplikationen"
+    },
+    "tableName": "condition",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "arrayPath": "code.coding"
+    },
+    "dateFilter": {
+      "path": "recordeddate",
+      "type": "DATE"
+    }
+  },
+  {
+    "context": {
+      "system": "fdpg.mii.cds",
+      "code": "Specimen",
+      "display": "Bioprobe",
+      "version": "1.0.0"
+    },
+    "key": {
+      "system": "http://snomed.info/sct",
+      "code": "119364003",
+      "display": "Serum specimen"
+    },
+    "tableName": "specimen",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "arrayPath": "type.coding"
+    },
+    "referenceAttributeFilters": [
+      {
+        "attributeCode": "festgestellteDiagnose",
+        "extensionUrl": "https://www.medizininformatik-initiative.de/fhir/ext/modul-biobank/StructureDefinition/Diagnose",
+        "extensionArrayPath": "_extension",
+        "referenceValuePath": "valuereference.reference"
+      }
+    ]
+  },
+  {
+    "context": {
       "code": "Medikamentenverabreichung",
       "display": "Verabreichung von Medikamenten",
       "system": "fdpg.mii.cds",

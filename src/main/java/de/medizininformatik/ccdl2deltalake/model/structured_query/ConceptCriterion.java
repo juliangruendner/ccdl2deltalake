@@ -7,23 +7,27 @@ import de.medizininformatik.ccdl2deltalake.model.MappingContext;
 import de.medizininformatik.ccdl2deltalake.model.TermCode;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Selects patients that have at least one resource matching the concept (e.g., a Condition with a specific code).
- */
 public final class ConceptCriterion extends AbstractCriterion {
 
-    private ConceptCriterion(ContextualConcept concept, TimeRestriction timeRestriction) {
-        super(concept, timeRestriction);
+    private ConceptCriterion(ContextualConcept concept, TimeRestriction timeRestriction,
+                              List<AttributeFilter> attributeFilters) {
+        super(concept, timeRestriction, attributeFilters);
     }
 
     public static ConceptCriterion of(ContextualConcept concept) {
-        return new ConceptCriterion(concept, null);
+        return new ConceptCriterion(concept, null, List.of());
     }
 
     public static ConceptCriterion of(ContextualConcept concept, TimeRestriction timeRestriction) {
-        return new ConceptCriterion(concept, timeRestriction);
+        return new ConceptCriterion(concept, timeRestriction, List.of());
+    }
+
+    public static ConceptCriterion of(ContextualConcept concept, TimeRestriction timeRestriction,
+                                      List<AttributeFilter> attributeFilters) {
+        return new ConceptCriterion(concept, timeRestriction, attributeFilters);
     }
 
     @Override
@@ -35,7 +39,7 @@ public final class ConceptCriterion extends AbstractCriterion {
             var mapping = ctx.findMapping(ctc)
                 .orElseThrow(() -> new MappingNotFoundException(ctc));
             var expanded = ctx.expandTermCode(ctc).toList();
-            subQueries.add(buildTermCodeSql(catalog, mapping, expanded, null));
+            subQueries.add(buildTermCodeSql(catalog, mapping, expanded, null, ctx));
         }
 
         if (subQueries.isEmpty()) {

@@ -20,12 +20,16 @@ class TranslatorTest {
     static final TermCode DIAGNOSE_CTX = TermCode.of("fdpg.mii.cds", "Diagnose", "Diagnose");
     static final TermCode LAB_CTX = TermCode.of("fdpg.mii.cds", "Laboruntersuchung", "Laboruntersuchung");
     static final TermCode MED_CTX = TermCode.of("fdpg.mii.cds", "Medikamentenverabreichung", "Verabreichung von Medikamenten");
+    static final TermCode SPECIMEN_CTX = TermCode.of("fdpg.mii.cds", "Specimen", "Bioprobe");
 
     static final TermCode MIGRAINE = TermCode.of("http://snomed.info/sct", "37796009", "Migraine");
     static final TermCode GASTRITIS = TermCode.of("http://snomed.info/sct", "4556007", "Gastritis");
     static final TermCode LEUKOCYTES = TermCode.of("http://loinc.org", "26464-8", "Leukocytes");
     static final TermCode HEMOGLOBIN = TermCode.of("http://loinc.org", "718-7", "Hemoglobin");
     static final TermCode HEPARIN = TermCode.of("http://fhir.de/CodeSystem/bfarm/atc", "B01AB01", "Ölsäure-Derivate");
+    static final TermCode SERUM_SPECIMEN = TermCode.of("http://snomed.info/sct", "119364003", "Serum specimen");
+    static final TermCode DIABETES_E13_9 = TermCode.of("http://fhir.de/CodeSystem/bfarm/icd-10-gm", "E13.9", "Sonstiger Diabetes: Ohne Komplikationen");
+    static final TermCode DIAGNOSE_CTX_TC = TermCode.of("fdpg.mii.cds", "Diagnose", "Diagnose");
 
     static MappingContext ctx;
     static Translator translator;
@@ -44,7 +48,8 @@ class TranslatorTest {
         var sql = SqlWriter.write("concept_criterion", criterion.toSql(ctx, "fhir.default"));
 
         assertThat(sql).contains("SELECT DISTINCT SPLIT_PART(t.subject.reference, '/', 2) AS patient_id");
-        assertThat(sql).contains("FROM fhir.default.condition t, UNNEST(t.code.coding) AS tc");
+        assertThat(sql).contains("FROM fhir.default.condition t");
+        assertThat(sql).contains("CROSS JOIN UNNEST(t.code.coding) AS tc");
         assertThat(sql).contains("tc.system = 'http://snomed.info/sct'");
         assertThat(sql).contains("tc.code IN ('37796009')");
     }
@@ -215,6 +220,28 @@ class TranslatorTest {
         assertThat(sql).contains("'/nL'");
     }
 
+
+    @Test
+    void referenceAttributeFilter_specimenWithDiagnosis_generatesJoinSql() throws Exception {
+        var json = java.nio.file.Files.readString(
+            java.nio.file.Path.of("src/test/resources/ccdl/spec-cond.json"));
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var query = mapper.readValue(json, StructuredQuery.class);
+        var sql = SqlWriter.write("ref_attr_filter_specimen_condition", translator.toSql(query));
+
+        assertThat(sql).contains("FROM fhir.default.specimen t");
+        assertThat(sql).contains("CROSS JOIN UNNEST(t.type.coding) AS tc");
+        assertThat(sql).contains("CROSS JOIN UNNEST(t._extension)");
+        assertThat(sql).contains("CROSS JOIN UNNEST(_earr0) AS ext0");
+        assertThat(sql).contains("INNER JOIN fhir.default.condition ref0");
+        assertThat(sql).contains("ref0.id = SPLIT_PART(ext0.valuereference.reference, '/', 2)");
+        assertThat(sql).contains("CROSS JOIN UNNEST(ref0.code.coding) AS ref_tc0");
+        assertThat(sql).contains("tc.system = 'http://snomed.info/sct'");
+        assertThat(sql).contains("tc.code IN ('119364003')");
+        assertThat(sql).contains("ext0.url = 'https://www.medizininformatik-initiative.de/fhir/ext/modul-biobank/StructureDefinition/Diagnose'");
+        assertThat(sql).contains("ref_tc0.system = 'http://fhir.de/CodeSystem/bfarm/icd-10-gm'");
+        assertThat(sql).contains("ref_tc0.code IN ('E13.9')");
+    }
 
     @Test
     void joinedTermCode_medicationAdministration_generatesJoinSql() {
