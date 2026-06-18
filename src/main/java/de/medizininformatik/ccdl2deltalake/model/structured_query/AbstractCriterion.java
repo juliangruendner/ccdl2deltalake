@@ -62,21 +62,31 @@ abstract class AbstractCriterion implements Criterion {
               .append(", '/', 2) AS patient_id\n");
             sb.append("FROM ").append(catalog).append(".").append(mapping.tableName()).append(" t\n");
 
-            tcf.getJoin().ifPresentOrElse(join -> {
-                sb.append("JOIN ").append(catalog).append(".").append(join.table())
-                  .append(" j ON t.").append(join.primaryRefPath())
-                  .append(" = j.").append(join.secondaryIdPath()).append("\n");
-                sb.append("CROSS JOIN UNNEST(j.").append(tcf.arrayPath()).append(") AS tc\n");
-            }, () -> {
-                sb.append("CROSS JOIN UNNEST(t.").append(tcf.arrayPath()).append(") AS tc\n");
-            });
+            if (tcf.getSinglePath().isPresent()) {
+                // Single Coding struct (e.g. Encounter.class) — no UNNEST
+            } else {
+                tcf.getJoin().ifPresentOrElse(join -> {
+                    sb.append("JOIN ").append(catalog).append(".").append(join.table())
+                      .append(" j ON t.").append(join.primaryRefPath())
+                      .append(" = j.").append(join.secondaryIdPath()).append("\n");
+                    sb.append("CROSS JOIN UNNEST(j.").append(tcf.arrayPath()).append(") AS tc\n");
+                }, () -> {
+                    sb.append("CROSS JOIN UNNEST(t.").append(tcf.arrayPath()).append(") AS tc\n");
+                });
+            }
 
             for (var frag : refFragments) {
                 sb.append(frag.fromClause());
             }
 
-            sb.append("WHERE tc.system = '").append(escape(system)).append("'\n");
-            sb.append("  AND tc.code IN (").append(inClause).append(")");
+            if (tcf.getSinglePath().isPresent()) {
+                String sp = tcf.getSinglePath().get();
+                sb.append("WHERE t.").append(sp).append(".system = '").append(escape(system)).append("'\n");
+                sb.append("  AND t.").append(sp).append(".code IN (").append(inClause).append(")");
+            } else {
+                sb.append("WHERE tc.system = '").append(escape(system)).append("'\n");
+                sb.append("  AND tc.code IN (").append(inClause).append(")");
+            }
 
             if (additionalWhere != null && !additionalWhere.isBlank()) {
                 sb.append("\n  AND ").append(additionalWhere);
