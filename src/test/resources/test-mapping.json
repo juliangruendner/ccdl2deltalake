@@ -1,0 +1,148 @@
+[
+  {
+    "context": {
+      "system": "fdpg.mii.cds",
+      "code": "Diagnose",
+      "display": "Diagnose",
+      "version": "1.0.0"
+    },
+    "key": {
+      "system": "http://snomed.info/sct",
+      "code": "37796009",
+      "display": "Migraine (disorder)"
+    },
+    "tableName": "condition",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "arrayPath": "code.coding"
+    },
+    "dateFilter": {
+      "path": "recordeddate",
+      "type": "DATE"
+    }
+  },
+  {
+    "context": {
+      "system": "fdpg.mii.cds",
+      "code": "Diagnose",
+      "display": "Diagnose",
+      "version": "1.0.0"
+    },
+    "key": {
+      "system": "http://snomed.info/sct",
+      "code": "4556007",
+      "display": "Gastritis (disorder)"
+    },
+    "tableName": "condition",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "arrayPath": "code.coding"
+    }
+  },
+  {
+    "context": {
+      "system": "fdpg.mii.cds",
+      "code": "Laboruntersuchung",
+      "display": "Laboruntersuchung",
+      "version": "1.0.0"
+    },
+    "key": {
+      "system": "http://loinc.org",
+      "code": "26464-8",
+      "display": "Leukocytes [#/volume] in Blood"
+    },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "arrayPath": "code.coding"
+    },
+    "valueFilter": {
+      "type": "QUANTITY",
+      "path": "valuequantity",
+      "valueField": "value",
+      "unitCodeField": "code"
+    },
+    "dateFilter": {
+      "path": "effectivedatetime",
+      "type": "DATETIME"
+    }
+  },
+  {
+    "context": {
+      "system": "fdpg.mii.cds",
+      "code": "Diagnose",
+      "display": "Diagnose",
+      "version": "1.0.0"
+    },
+    "key": {
+      "system": "http://fhir.de/CodeSystem/bfarm/icd-10-gm",
+      "code": "E10-E14",
+      "display": "Diabetes mellitus"
+    },
+    "tableName": "condition",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "arrayPath": "code.coding"
+    },
+    "dateFilter": {
+      "path": "recordeddate",
+      "type": "DATE"
+    }
+  },
+  {
+    "context": {
+      "system": "fdpg.mii.cds",
+      "code": "Laboruntersuchung",
+      "display": "Laboruntersuchung",
+      "version": "1.0.0"
+    },
+    "key": {
+      "system": "http://loinc.org",
+      "code": "718-7",
+      "display": "Hemoglobin [Mass/volume] in Blood"
+    },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "arrayPath": "code.coding"
+    },
+    "valueFilter": {
+      "type": "QUANTITY",
+      "path": "valuequantity",
+      "valueField": "value",
+      "unitCodeField": "code"
+    },
+    "dateFilter": {
+      "path": "effectivedatetime",
+      "type": "DATETIME"
+    }
+  },
+  {
+    "context": {
+      "code": "Medikamentenverabreichung",
+      "display": "Verabreichung von Medikamenten",
+      "system": "fdpg.mii.cds",
+      "version": "1.0.0"
+    },
+    "key": {
+      "code": "B01AB01",
+      "display": "\u00d6ls\u00e4ure-Derivate",
+      "system": "http://fhir.de/CodeSystem/bfarm/atc",
+      "version": "2026"
+    },
+    "tableName": "medicationadministration",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "arrayPath": "code.coding",
+      "join": {
+        "table": "medication",
+        "primaryRefPath": "medicationreference.reference",
+        "secondaryIdPath": "id_versioned"
+      }
+    },
+    "dateFilter": {
+      "path": "effectivedatetime",
+      "type": "DATETIME"
+    }
+  }
+]

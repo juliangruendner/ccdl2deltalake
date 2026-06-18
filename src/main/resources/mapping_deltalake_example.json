@@ -1,0 +1,223 @@
+[
+  {
+    "context": {
+      "system": "fdpg.mii.cds",
+      "code": "Diagnose",
+      "display": "Diagnose",
+      "version": "1.0.0"
+    },
+    "key": {
+      "system": "http://snomed.info/sct",
+      "code": "37796009",
+      "display": "Migraine (disorder)"
+    },
+    "tableName": "condition",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "arrayPath": "code.coding"
+    },
+    "dateFilter": {
+      "path": "recordeddate",
+      "type": "DATE"
+    }
+  },
+  {
+    "context": {
+      "system": "fdpg.mii.cds",
+      "code": "Diagnose",
+      "display": "Diagnose",
+      "version": "1.0.0"
+    },
+    "key": {
+      "system": "http://snomed.info/sct",
+      "code": "4556007",
+      "display": "Gastritis (disorder)"
+    },
+    "tableName": "condition",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "arrayPath": "code.coding"
+    },
+    "dateFilter": {
+      "path": "recordeddate",
+      "type": "DATE"
+    }
+  },
+  {
+    "context": {
+      "system": "fdpg.mii.cds",
+      "code": "Diagnose",
+      "display": "Diagnose",
+      "version": "1.0.0"
+    },
+    "key": {
+      "system": "http://snomed.info/sct",
+      "code": "254637007",
+      "display": "Non-small cell lung cancer (disorder)"
+    },
+    "tableName": "condition",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "arrayPath": "code.coding"
+    },
+    "dateFilter": {
+      "path": "recordeddate",
+      "type": "DATE"
+    }
+  },
+  {
+    "context": {
+      "system": "fdpg.mii.cds",
+      "code": "Diagnose",
+      "display": "Diagnose",
+      "version": "1.0.0"
+    },
+    "key": {
+      "system": "http://hl7.org/fhir/sid/icd-10",
+      "code": "A15.0",
+      "display": "Tuberculosis of lung"
+    },
+    "tableName": "condition",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "arrayPath": "code.coding"
+    },
+    "dateFilter": {
+      "path": "recordeddate",
+      "type": "DATE"
+    }
+  },
+  {
+    "context": {
+      "system": "fdpg.mii.cds",
+      "code": "Diagnose",
+      "display": "Diagnose",
+      "version": "1.0.0"
+    },
+    "key": {
+      "system": "http://fhir.de/CodeSystem/bfarm/icd-10-gm",
+      "code": "C34.1",
+      "display": "Bösartige Neubildung des Oberlappens"
+    },
+    "tableName": "condition",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "arrayPath": "code.coding"
+    },
+    "dateFilter": {
+      "path": "recordeddate",
+      "type": "DATE"
+    }
+  },
+  {
+    "context": {
+      "system": "fdpg.mii.cds",
+      "code": "Laboruntersuchung",
+      "display": "Laboruntersuchung",
+      "version": "1.0.0"
+    },
+    "key": {
+      "system": "http://loinc.org",
+      "code": "718-7",
+      "display": "Hemoglobin [Mass/volume] in Blood"
+    },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "arrayPath": "code.coding"
+    },
+    "valueFilter": {
+      "type": "QUANTITY",
+      "path": "valuequantity",
+      "valueField": "value",
+      "unitCodeField": "code"
+    },
+    "dateFilter": {
+      "path": "effectivedatetime",
+      "type": "DATETIME"
+    }
+  },
+  {
+    "context": {
+      "system": "fdpg.mii.cds",
+      "code": "Laboruntersuchung",
+      "display": "Laboruntersuchung",
+      "version": "1.0.0"
+    },
+    "key": {
+      "system": "http://loinc.org",
+      "code": "26464-8",
+      "display": "Leukocytes [#/volume] in Blood"
+    },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "arrayPath": "code.coding"
+    },
+    "valueFilter": {
+      "type": "QUANTITY",
+      "path": "valuequantity",
+      "valueField": "value",
+      "unitCodeField": "code"
+    },
+    "dateFilter": {
+      "path": "effectivedatetime",
+      "type": "DATETIME"
+    }
+  },
+  {
+    "context": {
+      "system": "fdpg.mii.cds",
+      "code": "Laboruntersuchung",
+      "display": "Laboruntersuchung",
+      "version": "1.0.0"
+    },
+    "key": {
+      "system": "http://loinc.org",
+      "code": "26453-1",
+      "display": "Erythrocytes [#/volume] in Blood"
+    },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "arrayPath": "code.coding"
+    },
+    "valueFilter": {
+      "type": "QUANTITY",
+      "path": "valuequantity",
+      "valueField": "value",
+      "unitCodeField": "code"
+    },
+    "dateFilter": {
+      "path": "effectivedatetime",
+      "type": "DATETIME"
+    }
+  },
+  {
+    "context": {
+      "system": "fdpg.mii.cds",
+      "code": "Medikamentenverabreichung",
+      "display": "Verabreichung von Medikamenten",
+      "version": "1.0.0"
+    },
+    "key": {
+      "system": "http://fhir.de/CodeSystem/bfarm/atc",
+      "code": "B01AB01",
+      "display": "Ölsäure-Derivate"
+    },
+    "tableName": "medicationadministration",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "arrayPath": "code.coding",
+      "join": {
+        "table": "medication",
+        "primaryRefPath": "medicationreference.reference",
+        "secondaryIdPath": "id_versioned"
+      }
+    },
+    "dateFilter": {
+      "path": "effectivedatetime",
+      "type": "DATETIME"
+    }
+  }
+]
