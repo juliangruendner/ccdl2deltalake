@@ -1,0 +1,36 @@
+{
+  "version": "https://medizininformatik-initiative.de/fdpg/StructuredQuery/v3/schema",
+  "display": "",
+  "inclusionCriteria": [
+    [
+      {
+        "context": {
+          "code": "Specimen",
+          "system": "fdpg.mii.cds",
+          "version": "1.0.0",
+          "display": "Bioprobe"
+        },
+        "termCodes": [
+          {
+            "code": "119364003",
+            "system": "http://snomed.info/sct",
+            "display": "Serum specimen"
+          }
+        ],
+        "attributeFilters": [
+          {
+            "type": "quantity-comparator",
+            "attributeCode": {
+              "code": "specimenAmount",
+              "display": "Probenmenge",
+              "system": "fdpg.mii.cds.biobank"
+            },
+            "comparator": "gt",
+            "value": 0.0,
+            "unit": { "code": "mL" }
+          }
+        ]
+      }
+    ]
+  ]
+}

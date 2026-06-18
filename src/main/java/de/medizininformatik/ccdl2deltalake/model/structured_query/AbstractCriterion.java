@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
+
 abstract class AbstractCriterion implements Criterion {
 
     protected final ContextualConcept concept;
@@ -45,6 +47,7 @@ abstract class AbstractCriterion implements Criterion {
             .collect(Collectors.groupingBy(TermCode::system));
 
         var refFragments = buildRefFilterFragments(catalog, mapping, ctx);
+        var simpleAttrConditions = buildSimpleAttributeWhereConditions(mapping);
 
         var groupQueries = new ArrayList<String>();
         for (var entry : bySystem.entrySet()) {
@@ -86,6 +89,10 @@ abstract class AbstractCriterion implements Criterion {
                 }
             }
 
+            for (var cond : simpleAttrConditions) {
+                sb.append("\n  AND ").append(cond);
+            }
+
             for (var frag : refFragments) {
                 sb.append("\n  AND ").append(frag.whereCondition());
             }
@@ -105,8 +112,9 @@ abstract class AbstractCriterion implements Criterion {
                                                              MappingContext ctx) {
         var fragments = new ArrayList<RefFilterFragment>();
 
-        for (int i = 0; i < attributeFilters.size(); i++) {
-            var af = attributeFilters.get(i);
+        int i = 0;
+        for (var af : attributeFilters) {
+            if (!"reference".equals(af.type())) continue;
             var rafConfig = mapping.findRefAttributeFilter(af.attributeCode().code())
                 .orElseThrow(() -> new TranslationException(
                     "No referenceAttributeFilter config for attributeCode '"
@@ -195,9 +203,52 @@ abstract class AbstractCriterion implements Criterion {
             }
 
             fragments.add(new RefFilterFragment(fromSb.toString(), whereCondition));
+            i++;
         }
 
         return fragments;
+    }
+
+    private List<String> buildSimpleAttributeWhereConditions(Mapping mapping) {
+        var conditions = new ArrayList<String>();
+        for (var af : attributeFilters) {
+            if ("reference".equals(af.type())) continue;
+            var cfg = mapping.findSimpleAttributeFilter(af.attributeCode().code())
+                .orElseThrow(() -> new TranslationException(
+                    "No simpleAttributeFilter config for attributeCode '"
+                    + af.attributeCode().code() + "' in mapping for " + mapping.tableName()));
+
+            switch (af.type()) {
+                case "quantity-comparator" -> {
+                    String valueField = cfg.getValueField().orElseThrow(() -> new TranslationException(
+                        "valueField required for quantity-comparator in mapping for " + mapping.tableName()));
+                    conditions.add("t." + cfg.path() + "." + valueField + " "
+                        + af.comparator().toSql() + " " + af.value());
+                    if (af.unit() != null) {
+                        cfg.getUnitCodeField().ifPresent(ucf ->
+                            conditions.add("t." + cfg.path() + "." + ucf + " = '" + escape(af.unit()) + "'"));
+                    }
+                }
+                case "quantity-range" -> {
+                    String valueField = cfg.getValueField().orElseThrow(() -> new TranslationException(
+                        "valueField required for quantity-range in mapping for " + mapping.tableName()));
+                    conditions.add("t." + cfg.path() + "." + valueField
+                        + " BETWEEN " + af.minValue() + " AND " + af.maxValue());
+                    if (af.unit() != null) {
+                        cfg.getUnitCodeField().ifPresent(ucf ->
+                            conditions.add("t." + cfg.path() + "." + ucf + " = '" + escape(af.unit()) + "'"));
+                    }
+                }
+                case "concept" -> {
+                    String inClause = af.selectedConcepts().stream()
+                        .map(tc -> "'" + escape(tc.code()) + "'")
+                        .collect(Collectors.joining(", "));
+                    conditions.add("t." + cfg.path() + " IN (" + inClause + ")");
+                }
+                default -> throw new TranslationException("Unknown simple attribute filter type: " + af.type());
+            }
+        }
+        return conditions;
     }
 
     protected static String escape(String s) {

@@ -163,6 +163,18 @@
         "extensionArrayPath": "_extension",
         "referenceValuePath": "valuereference.reference"
       }
+    ],
+    "simpleAttributeFilters": [
+      {
+        "attributeCode": "specimenStatus",
+        "path": "status"
+      },
+      {
+        "attributeCode": "specimenAmount",
+        "path": "collection.quantity",
+        "valueField": "value",
+        "unitCodeField": "code"
+      }
     ]
   },
   {

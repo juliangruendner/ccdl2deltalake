@@ -1,0 +1,40 @@
+{
+  "version": "https://medizininformatik-initiative.de/fdpg/StructuredQuery/v3/schema",
+  "display": "",
+  "inclusionCriteria": [
+    [
+      {
+        "context": {
+          "code": "Specimen",
+          "system": "fdpg.mii.cds",
+          "version": "1.0.0",
+          "display": "Bioprobe"
+        },
+        "termCodes": [
+          {
+            "code": "119364003",
+            "system": "http://snomed.info/sct",
+            "display": "Serum specimen"
+          }
+        ],
+        "attributeFilters": [
+          {
+            "type": "concept",
+            "attributeCode": {
+              "code": "specimenStatus",
+              "display": "Status der Probe",
+              "system": "fdpg.mii.cds.biobank"
+            },
+            "selectedConcepts": [
+              {
+                "code": "available",
+                "system": "http://hl7.org/fhir/specimen-status",
+                "display": "Available"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  ]
+}

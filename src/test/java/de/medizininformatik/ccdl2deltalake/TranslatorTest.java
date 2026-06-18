@@ -257,6 +257,51 @@ class TranslatorTest {
     }
 
     @Test
+    void quantityComparatorAttributeFilter_generatesCorrectSql() throws Exception {
+        var json = java.nio.file.Files.readString(
+            java.nio.file.Path.of("src/test/resources/ccdl/spec-qty-comparator.json"));
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var query = mapper.readValue(json, StructuredQuery.class);
+        var sql = SqlWriter.write("qty_comparator_attr_filter", translator.toSql(query));
+
+        assertThat(sql).contains("FROM fhir.default.specimen t");
+        assertThat(sql).contains("CROSS JOIN UNNEST(t.type.coding) AS tc");
+        assertThat(sql).contains("tc.code IN ('119364003')");
+        assertThat(sql).contains("t.collection.quantity.value > 0.0");
+        assertThat(sql).contains("t.collection.quantity.code = 'mL'");
+        assertThat(sql).doesNotContain("INNER JOIN");
+    }
+
+    @Test
+    void quantityRangeAttributeFilter_generatesCorrectSql() throws Exception {
+        var json = java.nio.file.Files.readString(
+            java.nio.file.Path.of("src/test/resources/ccdl/spec-qty-range.json"));
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var query = mapper.readValue(json, StructuredQuery.class);
+        var sql = SqlWriter.write("qty_range_attr_filter", translator.toSql(query));
+
+        assertThat(sql).contains("FROM fhir.default.specimen t");
+        assertThat(sql).contains("tc.code IN ('119364003')");
+        assertThat(sql).contains("t.collection.quantity.value BETWEEN 0.0 AND 1000.0");
+        assertThat(sql).contains("t.collection.quantity.code = 'mL'");
+        assertThat(sql).doesNotContain("INNER JOIN");
+    }
+
+    @Test
+    void conceptAttributeFilter_generatesCorrectSql() throws Exception {
+        var json = java.nio.file.Files.readString(
+            java.nio.file.Path.of("src/test/resources/ccdl/spec-concept-attr.json"));
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var query = mapper.readValue(json, StructuredQuery.class);
+        var sql = SqlWriter.write("concept_attr_filter", translator.toSql(query));
+
+        assertThat(sql).contains("FROM fhir.default.specimen t");
+        assertThat(sql).contains("tc.code IN ('119364003')");
+        assertThat(sql).contains("t.status IN ('available')");
+        assertThat(sql).doesNotContain("INNER JOIN");
+    }
+
+    @Test
     void testNew() throws Exception {
         MappingContext ctxWithTree;
         try (var ms = TranslatorTest.class.getResourceAsStream("/test-mapping.json");

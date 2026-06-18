@@ -198,6 +198,48 @@ class TrinoIT {
 
     @Test
     @Order(10)
+    void quantityComparatorAttributeFilter_specimenWithAmount_returnsPatients() throws Exception {
+        var json = java.nio.file.Files.readString(
+            java.nio.file.Path.of("src/test/resources/ccdl/spec-qty-comparator.json"));
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var query = mapper.readValue(json, StructuredQuery.class);
+        var sql = SqlWriter.write("it_qty_comparator_specimen", translator.toSql(query));
+
+        var results = executeQuery(sql);
+        System.out.println("Serum specimen amount > 0 mL patients: " + results);
+        assertThat(results).isNotEmpty();
+    }
+
+    @Test
+    @Order(11)
+    void quantityRangeAttributeFilter_specimenAmountInRange_returnsPatients() throws Exception {
+        var json = java.nio.file.Files.readString(
+            java.nio.file.Path.of("src/test/resources/ccdl/spec-qty-range.json"));
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var query = mapper.readValue(json, StructuredQuery.class);
+        var sql = SqlWriter.write("it_qty_range_specimen", translator.toSql(query));
+
+        var results = executeQuery(sql);
+        System.out.println("Serum specimen amount 0–1000 mL patients: " + results);
+        assertThat(results).isNotEmpty();
+    }
+
+    @Test
+    @Order(12)
+    void conceptAttributeFilter_specimenStatusAvailable_returnsPatients() throws Exception {
+        var json = java.nio.file.Files.readString(
+            java.nio.file.Path.of("src/test/resources/ccdl/spec-concept-attr.json"));
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var query = mapper.readValue(json, StructuredQuery.class);
+        var sql = SqlWriter.write("it_concept_attr_specimen_status", translator.toSql(query));
+
+        var results = executeQuery(sql);
+        System.out.println("Serum specimen status=available patients: " + results);
+        assertThat(results).isNotEmpty();
+    }
+
+    @Test
+    @Order(13)
     void jsonInput_endToEnd() throws Exception {
         var json = """
             {
