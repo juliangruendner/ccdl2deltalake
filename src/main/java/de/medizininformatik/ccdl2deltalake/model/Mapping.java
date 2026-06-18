@@ -44,7 +44,7 @@ public record Mapping(
             requireNonNull(key, "missing: key"),
             requireNonNull(tableName, "missing: tableName"),
             requireNonNull(patientRefPath, "missing: patientRefPath"),
-            requireNonNull(termCodeFilter, "missing: termCodeFilter"),
+            termCodeFilter,   // nullable — absent for Patient-type resources with no term-code array
             valueFilter,
             dateFilter,
             referenceAttributeFilters != null ? List.copyOf(referenceAttributeFilters) : List.of(),
@@ -54,6 +54,10 @@ public record Mapping(
 
     public ContextualTermCode contextualKey() {
         return ContextualTermCode.of(context, key);
+    }
+
+    public Optional<TermCodeFilter> getTermCodeFilter() {
+        return Optional.ofNullable(termCodeFilter);
     }
 
     public Optional<ValueFilter> getValueFilter() {

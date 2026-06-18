@@ -5,6 +5,10 @@ Each gap lists the affected SQ files, the problem, and the required changes.
 
 ---
 
+## ~~Gap 1 — Encounter / `Fall` context~~ ✓ DONE
+
+## ~~Gap 2 — Patient gender~~ ✓ DONE
+
 ## Gap 1 — Encounter / `Fall` context (`Encounter.class` single Coding)
 
 **Affected SQs:**
@@ -45,7 +49,7 @@ WHERE t.class.system = 'http://terminology.hl7.org/CodeSystem/v3-ActCode'
 
 ---
 
-## Gap 2 — Patient gender (`Patient` table + scalar string column)
+## ~~Gap 2 — Patient gender (`Patient` table + scalar string column)~~ ✓ DONE
 
 **Affected SQs:**
 - `SpecimenSQExclusion.json`

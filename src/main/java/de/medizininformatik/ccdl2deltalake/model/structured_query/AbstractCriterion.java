@@ -37,17 +37,30 @@ abstract class AbstractCriterion implements Criterion {
     @Override
     public List<AttributeFilter> getAttributeFilters() { return attributeFilters; }
 
+    /** Returns the SQL expression for the patient identifier column. */
+    private String patientIdExpr(Mapping mapping) {
+        if ("patient".equals(mapping.tableName())) {
+            return "t." + mapping.patientRefPath();
+        }
+        return "SPLIT_PART(t." + mapping.patientRefPath() + ", '/', 2)";
+    }
+
     /**
      * Builds a SQL SELECT returning distinct patient_id values for the given codes,
      * including any reference attribute filter JOINs.
      */
     protected String buildTermCodeSql(String catalog, Mapping mapping, List<TermCode> codes,
                                        String additionalWhere, MappingContext ctx) {
-        Map<String, List<TermCode>> bySystem = codes.stream()
-            .collect(Collectors.groupingBy(TermCode::system));
-
         var refFragments = buildRefFilterFragments(catalog, mapping, ctx);
         var simpleAttrConditions = buildSimpleAttributeWhereConditions(mapping);
+
+        // Patient-like resources: no term-code array to filter on — just apply other conditions
+        if (mapping.getTermCodeFilter().isEmpty()) {
+            return buildNoTermCodeSql(catalog, mapping, additionalWhere, simpleAttrConditions, refFragments);
+        }
+
+        Map<String, List<TermCode>> bySystem = codes.stream()
+            .collect(Collectors.groupingBy(TermCode::system));
 
         var groupQueries = new ArrayList<String>();
         for (var entry : bySystem.entrySet()) {
@@ -58,8 +71,7 @@ abstract class AbstractCriterion implements Criterion {
 
             var tcf = mapping.termCodeFilter();
             var sb = new StringBuilder();
-            sb.append("SELECT DISTINCT SPLIT_PART(t.").append(mapping.patientRefPath())
-              .append(", '/', 2) AS patient_id\n");
+            sb.append("SELECT DISTINCT ").append(patientIdExpr(mapping)).append(" AS patient_id\n");
             sb.append("FROM ").append(catalog).append(".").append(mapping.tableName()).append(" t\n");
 
             if (tcf.getSinglePath().isPresent()) {
@@ -114,6 +126,47 @@ abstract class AbstractCriterion implements Criterion {
         return groupQueries.stream()
             .map(s -> "(\n" + s + "\n)")
             .collect(Collectors.joining("\nUNION\n"));
+    }
+
+    /**
+     * Generates a SELECT with no term-code UNNEST/filter — used for Patient-type resources
+     * where the concept term code is a semantic label, not a data column filter.
+     */
+    private String buildNoTermCodeSql(String catalog, Mapping mapping, String additionalWhere,
+                                       List<String> simpleAttrConditions,
+                                       List<RefFilterFragment> refFragments) {
+        var sb = new StringBuilder();
+        sb.append("SELECT DISTINCT ").append(patientIdExpr(mapping)).append(" AS patient_id\n");
+        sb.append("FROM ").append(catalog).append(".").append(mapping.tableName()).append(" t\n");
+
+        for (var frag : refFragments) sb.append(frag.fromClause());
+
+        boolean hasWhere = false;
+
+        if (additionalWhere != null && !additionalWhere.isBlank()) {
+            sb.append("WHERE ").append(additionalWhere);
+            hasWhere = true;
+        }
+
+        if (timeRestriction != null) {
+            String dc = timeRestriction.toSqlConditions(mapping, "t");
+            if (!dc.isBlank()) {
+                sb.append(hasWhere ? "\n  AND " : "WHERE ").append(dc);
+                hasWhere = true;
+            }
+        }
+
+        for (var cond : simpleAttrConditions) {
+            sb.append(hasWhere ? "\n  AND " : "WHERE ").append(cond);
+            hasWhere = true;
+        }
+
+        for (var frag : refFragments) {
+            sb.append(hasWhere ? "\n  AND " : "WHERE ").append(frag.whereCondition());
+            hasWhere = true;
+        }
+
+        return sb.toString();
     }
 
     private record RefFilterFragment(String fromClause, String whereCondition) {}

@@ -291,5 +291,12 @@
     "patientRefPath": "subject.reference",
     "termCodeFilter": { "singlePath": "class" },
     "dateFilter": { "path": "periodstart", "type": "DATE" }
+  },
+  {
+    "context": { "code": "Patient", "display": "Patient", "system": "fdpg.mii.cds", "version": "1.0.0" },
+    "key": { "code": "263495000", "display": "Geschlecht", "system": "http://snomed.info/sct" },
+    "tableName": "patient",
+    "patientRefPath": "id",
+    "valueFilter": { "type": "CODING_SCALAR", "path": "gender" }
   }
 ]

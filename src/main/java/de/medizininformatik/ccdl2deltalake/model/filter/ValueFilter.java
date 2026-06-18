@@ -5,11 +5,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
  * Describes how to access a value column in a Delta Lake table row.
- * Used by NumericCriterion and RangeCriterion.
+ * Used by NumericCriterion, RangeCriterion, and ValueSetCriterion.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = QuantityValueFilter.class, name = "QUANTITY")
+    @JsonSubTypes.Type(value = QuantityValueFilter.class, name = "QUANTITY"),
+    @JsonSubTypes.Type(value = CodingScalarValueFilter.class, name = "CODING_SCALAR")
 })
 public interface ValueFilter {
 

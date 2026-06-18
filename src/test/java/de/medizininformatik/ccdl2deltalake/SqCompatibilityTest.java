@@ -25,15 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *       {@code "arrayPath": null, "singlePath": "class"}) that generates
  *       {@code WHERE t.class.system = '...' AND t.class.code = '...'}.
  *
- *   <li><b>Patient gender / valueFilter on scalar column</b> — SpecimenSQExclusion,
- *       SpecimenSQTwoInclusion, and the Patient criteria in example-all-crits-time:
- *       the {@code Patient.gender} column is a plain string, not a coding array.
- *       Two things are missing:
- *       (a) {@code patientRefPath = "id"} must generate {@code t.id} directly (no SPLIT_PART),
- *           because patient IDs have no {@code /} prefix;
- *       (b) A {@code ValueSetCriterion} on a scalar column needs a non-UNNEST value filter
- *           variant in the mapping (e.g. {@code "type": "CODING_SINGLE", "path": "gender"}).
- *
  *   <li><b>Patient age</b> — example-all-crits-time (SNOMED 424144002):
  *       Requires {@code DATEDIFF('year', DATE(t.birthdate), CURRENT_DATE) <op> <val>} — a
  *       computed column not expressible with the current numeric value filter path.
@@ -284,6 +275,40 @@ class SqCompatibilityTest {
 
         assertThat(sql).contains("FROM fhir.default.specimen t");
         assertThat(sql).contains("tc.code IN ('396997002')");
+    }
+
+    @Test
+    void specimenSQExclusion_patientGenderInclusion_generatesExceptSql() throws Exception {
+        var sql = translate(SQ + "SpecimenSQExclusion.json");
+
+        // Inclusion: patient gender (no SPLIT_PART, direct t.id)
+        assertThat(sql).contains("t.id AS patient_id");
+        assertThat(sql).contains("FROM fhir.default.patient t");
+        assertThat(sql).contains("t.gender IN ('female')");
+        // Structure: inclusion EXCEPT exclusion
+        assertThat(sql).contains("EXCEPT");
+        // Exclusion: specimen with festgestellteDiagnose
+        assertThat(sql).contains("FROM fhir.default.specimen t");
+        assertThat(sql).contains("tc.code IN ('119364003')");
+        assertThat(sql).contains("INNER JOIN fhir.default.condition ref0");
+        assertThat(sql).contains("ref_tc0.code IN ('E13.9')");
+    }
+
+    @Test
+    void specimenSQTwoInclusion_patientAndSpecimen_generatesIntersectSql() throws Exception {
+        var sql = translate(SQ + "SpecimenSQTwoInclusion.json");
+
+        // Inclusion group 1: patient gender
+        assertThat(sql).contains("t.id AS patient_id");
+        assertThat(sql).contains("FROM fhir.default.patient t");
+        assertThat(sql).contains("t.gender IN ('female')");
+        // Inclusion group 2: specimen with festgestellteDiagnose
+        assertThat(sql).contains("FROM fhir.default.specimen t");
+        assertThat(sql).contains("tc.code IN ('119364003')");
+        assertThat(sql).contains("ref_tc0.code IN ('E13.9')");
+        // Structure: INTERSECT between the two groups
+        assertThat(sql).contains("INTERSECT");
+        assertThat(sql).doesNotContain("EXCEPT");
     }
 
     // ── Diagnose ─────────────────────────────────────────────────────────────
