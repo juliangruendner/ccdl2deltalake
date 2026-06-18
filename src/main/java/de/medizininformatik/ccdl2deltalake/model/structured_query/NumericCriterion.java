@@ -67,7 +67,7 @@ public final class NumericCriterion extends AbstractCriterion {
             additionalWhere.append(valueFilter.valueSqlPath("t"))
                            .append(" ").append(comparator.toSql())
                            .append(" ").append(value.toPlainString());
-            if (unit != null) {
+            if (unit != null && valueFilter.unitSqlPath("t") != null) {
                 additionalWhere.append("\n  AND ").append(valueFilter.unitSqlPath("t"))
                                .append(" = '").append(escape(unit)).append("'");
             }

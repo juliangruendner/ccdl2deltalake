@@ -1,12 +1,16 @@
 package de.medizininformatik.ccdl2deltalake;
 
 import de.medizininformatik.ccdl2deltalake.model.MappingContext;
-import de.medizininformatik.ccdl2deltalake.model.structured_query.StructuredQuery;
+import de.medizininformatik.ccdl2deltalake.model.TermCode;
+import de.medizininformatik.ccdl2deltalake.model.common.Comparator;
+import de.medizininformatik.ccdl2deltalake.model.structured_query.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -309,6 +313,42 @@ class SqCompatibilityTest {
         // Structure: INTERSECT between the two groups
         assertThat(sql).contains("INTERSECT");
         assertThat(sql).doesNotContain("EXCEPT");
+    }
+
+    // ── Patient age ───────────────────────────────────────────────────────────
+    // example-all-crits-time.json has multiple unsupported gaps (Consent, Einwilligung),
+    // so the age criterion is tested programmatically rather than from the full file.
+
+    static final TermCode PATIENT_CTX = TermCode.of("fdpg.mii.cds", "Patient", "Patient");
+    static final TermCode AGE_TC = TermCode.of("http://snomed.info/sct", "424144002",
+                                                "Gegenwärtiges chronologisches Alter");
+
+    @Test
+    void patientAge_comparatorEq_generatesDateDiffSql() throws Exception {
+        var concept = ContextualConcept.of(PATIENT_CTX, List.of(AGE_TC));
+        var criterion = NumericCriterion.of(concept, Comparator.EQUAL, new BigDecimal("20"), "a", null);
+        var sql = SqlWriter.write("patient_age_eq20", criterion.toSql(ctx, "fhir.default"));
+
+        assertThat(sql).contains("t.id AS patient_id");
+        assertThat(sql).contains("FROM fhir.default.patient t");
+        assertThat(sql).contains("DATE_DIFF('year', DATE(t.birthdate), CURRENT_DATE) = 20");
+        // Unit 'a' has no column to compare against — must not appear as a WHERE condition
+        assertThat(sql).doesNotContain("= 'a'");
+        assertThat(sql).doesNotContain("SPLIT_PART");
+        assertThat(sql).doesNotContain("UNNEST");
+    }
+
+    @Test
+    void patientAge_rangeGt18Lt65_generatesDateDiffBetweenSql() throws Exception {
+        var concept = ContextualConcept.of(PATIENT_CTX, List.of(AGE_TC));
+        var criterion = RangeCriterion.of(concept, new BigDecimal("18"), new BigDecimal("65"), "a", null);
+        var sql = SqlWriter.write("patient_age_range", criterion.toSql(ctx, "fhir.default"));
+
+        assertThat(sql).contains("t.id AS patient_id");
+        assertThat(sql).contains("FROM fhir.default.patient t");
+        assertThat(sql).contains("DATE_DIFF('year', DATE(t.birthdate), CURRENT_DATE) BETWEEN 18 AND 65");
+        assertThat(sql).doesNotContain("= 'a'");
+        assertThat(sql).doesNotContain("SPLIT_PART");
     }
 
     // ── Diagnose ─────────────────────────────────────────────────────────────

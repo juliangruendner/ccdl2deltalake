@@ -66,7 +66,7 @@ public final class RangeCriterion extends AbstractCriterion {
             additionalWhere.append(valueFilter.valueSqlPath("t"))
                            .append(" BETWEEN ").append(lowerBound.toPlainString())
                            .append(" AND ").append(upperBound.toPlainString());
-            if (unit != null) {
+            if (unit != null && valueFilter.unitSqlPath("t") != null) {
                 additionalWhere.append("\n  AND ").append(valueFilter.unitSqlPath("t"))
                                .append(" = '").append(escape(unit)).append("'");
             }

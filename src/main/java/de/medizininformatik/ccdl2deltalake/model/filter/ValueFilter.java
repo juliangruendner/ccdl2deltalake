@@ -10,7 +10,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = QuantityValueFilter.class, name = "QUANTITY"),
-    @JsonSubTypes.Type(value = CodingScalarValueFilter.class, name = "CODING_SCALAR")
+    @JsonSubTypes.Type(value = CodingScalarValueFilter.class, name = "CODING_SCALAR"),
+    @JsonSubTypes.Type(value = AgeValueFilter.class, name = "AGE")
 })
 public interface ValueFilter {
 

@@ -102,7 +102,7 @@ field. `ValueSetCriterion.toSql` branches on this type to emit `t.<path> IN (...
 
 ---
 
-## Gap 3 — Patient age (computed expression)
+## ~~Gap 3 — Patient age (computed expression)~~ ✓ DONE
 
 **Affected SQs:**
 - `example-all-crits-time.json` (SNOMED `424144002` "Gegenwärtiges chronologisches Alter")

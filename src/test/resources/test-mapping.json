@@ -298,5 +298,12 @@
     "tableName": "patient",
     "patientRefPath": "id",
     "valueFilter": { "type": "CODING_SCALAR", "path": "gender" }
+  },
+  {
+    "context": { "code": "Patient", "display": "Patient", "system": "fdpg.mii.cds", "version": "1.0.0" },
+    "key": { "code": "424144002", "display": "Gegenwärtiges chronologisches Alter", "system": "http://snomed.info/sct" },
+    "tableName": "patient",
+    "patientRefPath": "id",
+    "valueFilter": { "type": "AGE", "path": "birthdate" }
   }
 ]
