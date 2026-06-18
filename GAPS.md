@@ -141,7 +141,7 @@ WHERE DATE_DIFF('year', DATE(t.birthdate), CURRENT_DATE) = 20
 
 ---
 
-## Gap 4 — Consent / `Einwilligung` context
+## ~~Gap 4 — Consent / `Einwilligung` context~~ ✓ DONE (4a only; 4b combined system not supported)
 
 **Affected SQs:**
 - `consent.json`

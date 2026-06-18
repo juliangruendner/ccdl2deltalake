@@ -22,24 +22,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * features not yet implemented:
  *
  * <ol>
- *   <li><b>Encounter (Fall)</b> — EncounterInpatient, EncounterInpatientAbteilung,
- *       EncounterInpatientEinrichtung, EncounterInpatientEinrichtungTimeRestriction:
- *       {@code Encounter.class} is a single {@code Coding} struct (not a CodeableConcept array),
- *       so UNNEST won't work.  Needs a non-array termCodeFilter variant (e.g.
- *       {@code "arrayPath": null, "singlePath": "class"}) that generates
- *       {@code WHERE t.class.system = '...' AND t.class.code = '...'}.
- *
- *   <li><b>Patient age</b> — example-all-crits-time (SNOMED 424144002):
- *       Requires {@code DATEDIFF('year', DATE(t.birthdate), CURRENT_DATE) <op> <val>} — a
- *       computed column not expressible with the current numeric value filter path.
- *
- *   <li><b>Consent (Einwilligung)</b> — consent.json, NoSearchPathSQ, returningOnePatient/Consent,
- *       and Einwilligung criteria in example-all-crits-time:
- *       The {@code fdpg.consent.combined} system is a virtual combined-consent system not directly
- *       stored in Pathling Delta Lake.  Standard Consent uses
- *       {@code provision.code[*].coding[*]}, a deeply nested array that requires a two-level UNNEST
- *       (provision array → code array → coding array) not supported by the single-level
- *       {@code termCodeFilter.arrayPath}.
+ *   <li><b>Consent combined system</b> — returningOnePatient/Consent and Einwilligung criteria in
+ *       example-all-crits-time: {@code fdpg.consent.combined} is a virtual combined-consent system
+ *       not stored in Pathling Delta Lake — not supported by design.
  *
  *   <li><b>Body-site concept attribute filter (CodeableConcept)</b> — SpecimenSQAndBodySite:
  *       The {@code icd-o-3} attribute maps to {@code Specimen.collection.bodySite.coding}, which
@@ -349,6 +334,22 @@ class SqCompatibilityTest {
         assertThat(sql).contains("DATE_DIFF('year', DATE(t.birthdate), CURRENT_DATE) BETWEEN 18 AND 65");
         assertThat(sql).doesNotContain("= 'a'");
         assertThat(sql).doesNotContain("SPLIT_PART");
+    }
+
+    // ── Consent / Einwilligung ────────────────────────────────────────────────
+
+    @Test
+    void consent_chainedUnnest_generatesThreeLevelUnnestSql() throws Exception {
+        var sql = translate(SQ + "consent.json");
+
+        assertThat(sql).contains("FROM fhir.default.consent t");
+        // Three UNNEST levels: provision.provision → code → coding
+        assertThat(sql).contains("CROSS JOIN UNNEST(t.provision.provision) AS _tc0");
+        assertThat(sql).contains("CROSS JOIN UNNEST(_tc0.code) AS _tc1");
+        assertThat(sql).contains("CROSS JOIN UNNEST(_tc1.coding) AS tc");
+        assertThat(sql).contains("tc.system = 'urn:oid:2.16.840.1.113883.3.1937.777.24.5.3'");
+        assertThat(sql).contains("tc.code IN ('2.16.840.1.113883.3.1937.777.24.5.3.8')");
+        assertThat(sql).contains("SPLIT_PART(t.subject.reference, '/', 2) AS patient_id");
     }
 
     // ── Diagnose ─────────────────────────────────────────────────────────────

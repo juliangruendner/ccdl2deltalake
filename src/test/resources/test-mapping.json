@@ -305,5 +305,12 @@
     "tableName": "patient",
     "patientRefPath": "id",
     "valueFilter": { "type": "AGE", "path": "birthdate" }
+  },
+  {
+    "context": { "code": "Einwilligung", "display": "Einwilligung", "system": "fdpg.mii.cds", "version": "1.0.0" },
+    "key": { "code": "2.16.840.1.113883.3.1937.777.24.5.3.8", "display": "MDAT wissenschaftlich nutzen EU DSGVO NIVEAU", "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3" },
+    "tableName": "consent",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "chainedArrayPaths": ["provision.provision", "code", "coding"] }
   }
 ]

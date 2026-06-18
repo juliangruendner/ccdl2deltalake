@@ -76,6 +76,18 @@ abstract class AbstractCriterion implements Criterion {
 
             if (tcf.getSinglePath().isPresent()) {
                 // Single Coding struct (e.g. Encounter.class) — no UNNEST
+            } else if (tcf.getChainedArrayPaths().isPresent()) {
+                // Multi-level nested arrays (e.g. Consent: provision → sub-provisions → code → coding)
+                var paths = tcf.getChainedArrayPaths().get();
+                String prevAlias = "t";
+                for (int pi = 0; pi < paths.size() - 1; pi++) {
+                    String alias = "_tc" + pi;
+                    sb.append("CROSS JOIN UNNEST(").append(prevAlias).append(".")
+                      .append(paths.get(pi)).append(") AS ").append(alias).append("\n");
+                    prevAlias = alias;
+                }
+                sb.append("CROSS JOIN UNNEST(").append(prevAlias).append(".")
+                  .append(paths.get(paths.size() - 1)).append(") AS tc\n");
             } else {
                 tcf.getJoin().ifPresentOrElse(join -> {
                     sb.append("JOIN ").append(catalog).append(".").append(join.table())
