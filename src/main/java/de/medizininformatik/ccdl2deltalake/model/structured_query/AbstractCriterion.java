@@ -37,7 +37,6 @@ abstract class AbstractCriterion implements Criterion {
     @Override
     public List<AttributeFilter> getAttributeFilters() { return attributeFilters; }
 
-    /** Returns the SQL expression for the patient identifier column. */
     private String patientIdExpr(Mapping mapping) {
         if ("patient".equals(mapping.tableName())) {
             return "t." + mapping.patientRefPath();
@@ -54,7 +53,7 @@ abstract class AbstractCriterion implements Criterion {
         var refFragments = buildRefFilterFragments(catalog, mapping, ctx);
         var simpleAttrConditions = buildSimpleAttributeWhereConditions(mapping);
 
-        // Patient-like resources: no term-code array to filter on — just apply other conditions
+        // Patient-like resources: no term-code array — just apply other conditions
         if (mapping.getTermCodeFilter().isEmpty()) {
             return buildNoTermCodeSql(catalog, mapping, additionalWhere, simpleAttrConditions, refFragments);
         }
@@ -70,47 +69,35 @@ abstract class AbstractCriterion implements Criterion {
                 .collect(Collectors.joining(", "));
 
             var tcf = mapping.termCodeFilter();
+
+            // Determine start alias and table for cardinality lookup
+            String startAlias = tcf.getJoin().isPresent() ? "j" : "t";
+            String tableForLookup = tcf.getJoin().map(j -> j.table()).orElse(mapping.tableName());
+            var resolution = ctx.resolveTermCodePath(tableForLookup, tcf.path(), startAlias, "tc");
+
             var sb = new StringBuilder();
             sb.append("SELECT DISTINCT ").append(patientIdExpr(mapping)).append(" AS patient_id\n");
             sb.append("FROM ").append(catalog).append(".").append(mapping.tableName()).append(" t\n");
 
-            if (tcf.getSinglePath().isPresent()) {
-                // Single Coding struct (e.g. Encounter.class) — no UNNEST
-            } else if (tcf.getChainedArrayPaths().isPresent()) {
-                // Multi-level nested arrays (e.g. Consent: provision → sub-provisions → code → coding)
-                var paths = tcf.getChainedArrayPaths().get();
-                String prevAlias = "t";
-                for (int pi = 0; pi < paths.size() - 1; pi++) {
-                    String alias = "_tc" + pi;
-                    sb.append("CROSS JOIN UNNEST(").append(prevAlias).append(".")
-                      .append(paths.get(pi)).append(") AS ").append(alias).append("\n");
-                    prevAlias = alias;
-                }
-                sb.append("CROSS JOIN UNNEST(").append(prevAlias).append(".")
-                  .append(paths.get(paths.size() - 1)).append(") AS tc\n");
-            } else {
-                tcf.getJoin().ifPresentOrElse(join -> {
-                    sb.append("JOIN ").append(catalog).append(".").append(join.table())
-                      .append(" j ON t.").append(join.primaryRefPath())
-                      .append(" = j.").append(join.secondaryIdPath()).append("\n");
-                    sb.append("CROSS JOIN UNNEST(j.").append(tcf.arrayPath()).append(") AS tc\n");
-                }, () -> {
-                    sb.append("CROSS JOIN UNNEST(t.").append(tcf.arrayPath()).append(") AS tc\n");
-                });
+            tcf.getJoin().ifPresent(join ->
+                sb.append("JOIN ").append(catalog).append(".").append(join.table())
+                  .append(" j ON t.").append(join.primaryRefPath())
+                  .append(" = j.").append(join.secondaryIdPath()).append("\n")
+            );
+
+            for (var unnest : resolution.unnestClauses()) {
+                sb.append(unnest);
             }
 
             for (var frag : refFragments) {
                 sb.append(frag.fromClause());
             }
 
-            if (tcf.getSinglePath().isPresent()) {
-                String sp = tcf.getSinglePath().get();
-                sb.append("WHERE t.").append(sp).append(".system = '").append(escape(system)).append("'\n");
-                sb.append("  AND t.").append(sp).append(".code IN (").append(inClause).append(")");
-            } else {
-                sb.append("WHERE tc.system = '").append(escape(system)).append("'\n");
-                sb.append("  AND tc.code IN (").append(inClause).append(")");
-            }
+            String termPfx = resolution.terminalAlias()
+                + (resolution.remainingPath().isEmpty() ? "" : "." + resolution.remainingPath());
+
+            sb.append("WHERE ").append(termPfx).append(".system = '").append(escape(system)).append("'\n");
+            sb.append("  AND ").append(termPfx).append(".code IN (").append(inClause).append(")");
 
             if (additionalWhere != null && !additionalWhere.isBlank()) {
                 sb.append("\n  AND ").append(additionalWhere);
@@ -199,7 +186,6 @@ abstract class AbstractCriterion implements Criterion {
             String refAlias = "ref" + i;
             String refTcAlias = "ref_tc" + i;
 
-            // Collect inner codes grouped by system, across all inner criteria
             Mapping innerMapping = null;
             TimeRestriction innerTr = null;
             var innerBySystem = new LinkedHashMap<String, List<String>>();
@@ -218,14 +204,15 @@ abstract class AbstractCriterion implements Criterion {
             }
 
             if (innerMapping == null) {
-                throw new TranslationException("Reference attribute filter has no inner criteria: " + af.attributeCode().code());
+                throw new TranslationException(
+                    "Reference attribute filter has no inner criteria: " + af.attributeCode().code());
             }
 
-            // FROM clause — two modes depending on where the reference lives
+            final Mapping finalInnerMapping = innerMapping;
+            final TimeRestriction finalInnerTr = innerTr;
+
             var fromSb = new StringBuilder();
             if (rafConfig.isExtensionBased()) {
-                // _extension is MAP<integer, ARRAY<struct>> in Pathling's Delta Lake format.
-                // Double-UNNEST: expand map entries, then expand the inner array.
                 String mapAlias = "_emap" + i;
                 String arrAlias = "_earr" + i;
                 fromSb.append("CROSS JOIN UNNEST(t.")
@@ -239,37 +226,42 @@ abstract class AbstractCriterion implements Criterion {
                       .append(extAlias).append(".").append(rafConfig.referenceValuePath())
                       .append(", '/', 2)\n");
             } else {
-                // Direct reference field on the primary table (e.g. t.encounter.reference)
-                fromSb.append("INNER JOIN ").append(catalog).append(".").append(innerMapping.tableName())
+                fromSb.append("INNER JOIN ").append(catalog).append(".").append(finalInnerMapping.tableName())
                       .append(" ").append(refAlias)
                       .append(" ON ").append(refAlias).append(".id = SPLIT_PART(t.")
                       .append(rafConfig.referenceValuePath())
                       .append(", '/', 2)\n");
             }
-            fromSb.append("CROSS JOIN UNNEST(").append(refAlias).append(".")
-                  .append(innerMapping.termCodeFilter().arrayPath()).append(") AS ").append(refTcAlias).append("\n");
 
-            // WHERE conditions for inner codes
+            // Resolve UNNEST chain for inner mapping's term code path
+            var innerTcf = finalInnerMapping.getTermCodeFilter().orElseThrow(() ->
+                new TranslationException("Inner mapping for " + finalInnerMapping.tableName()
+                    + " has no termCodeFilter"));
+            var innerResolution = ctx.resolveTermCodePath(
+                finalInnerMapping.tableName(), innerTcf.path(), refAlias, refTcAlias);
+            for (var clause : innerResolution.unnestClauses()) {
+                fromSb.append(clause);
+            }
+
+            String innerTermPfx = innerResolution.terminalAlias()
+                + (innerResolution.remainingPath().isEmpty() ? "" : "." + innerResolution.remainingPath());
+
             var sysConditions = innerBySystem.entrySet().stream().map(e -> {
                 String inClause = e.getValue().stream()
                     .map(c -> "'" + escape(c) + "'")
                     .collect(Collectors.joining(", "));
-                return refTcAlias + ".system = '" + escape(e.getKey()) + "'"
-                    + " AND " + refTcAlias + ".code IN (" + inClause + ")";
+                return innerTermPfx + ".system = '" + escape(e.getKey()) + "'"
+                    + " AND " + innerTermPfx + ".code IN (" + inClause + ")";
             }).toList();
 
             String codeCondition = sysConditions.size() == 1
                 ? sysConditions.get(0)
                 : "(\n    " + String.join("\n    OR ", sysConditions) + "\n  )";
 
-            // Extension mode: also filter by URL in WHERE
             String whereCondition = rafConfig.isExtensionBased()
                 ? extAlias + ".url = '" + escape(rafConfig.extensionUrl()) + "'\n  AND " + codeCondition
                 : codeCondition;
 
-            // Optional inner time restriction applied to the referenced table
-            final Mapping finalInnerMapping = innerMapping;
-            final TimeRestriction finalInnerTr = innerTr;
             if (finalInnerTr != null) {
                 String trCondition = finalInnerTr.toSqlConditions(finalInnerMapping, refAlias);
                 if (!trCondition.isBlank()) {

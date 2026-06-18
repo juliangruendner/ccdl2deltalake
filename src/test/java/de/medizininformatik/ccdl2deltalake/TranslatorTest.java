@@ -36,8 +36,9 @@ class TranslatorTest {
 
     @BeforeAll
     static void setup() throws IOException {
-        try (var stream = TranslatorTest.class.getResourceAsStream("/test-mapping.json")) {
-            ctx = MappingContext.fromJson(stream);
+        try (var ms = TranslatorTest.class.getResourceAsStream("/test-mapping.json");
+             var td = TranslatorTest.class.getResourceAsStream("/test-table-descriptions.json")) {
+            ctx = MappingContext.fromJson(ms, td);
         }
         translator = Translator.of(ctx);
     }
@@ -168,8 +169,9 @@ class TranslatorTest {
     void labCondFile_translatesHemoglobinAndDiabetesWithIntersect() throws Exception {
         MappingContext ctxWithTree;
         try (var ms = TranslatorTest.class.getResourceAsStream("/test-mapping.json");
+             var td = TranslatorTest.class.getResourceAsStream("/test-table-descriptions.json");
              var ts = TranslatorTest.class.getResourceAsStream("/tree.json")) {
-            ctxWithTree = MappingContext.fromJson(ms, ts);
+            ctxWithTree = MappingContext.fromJson(ms, td, ts);
         }
         var translatorWithTree = Translator.of(ctxWithTree);
 
@@ -305,8 +307,9 @@ class TranslatorTest {
     void testNew() throws Exception {
         MappingContext ctxWithTree;
         try (var ms = TranslatorTest.class.getResourceAsStream("/test-mapping.json");
+             var td = TranslatorTest.class.getResourceAsStream("/test-table-descriptions.json");
              var ts = TranslatorTest.class.getResourceAsStream("/tree.json")) {
-            ctxWithTree = MappingContext.fromJson(ms, ts);
+            ctxWithTree = MappingContext.fromJson(ms, td, ts);
         }
         var translatorWithTree = Translator.of(ctxWithTree);
 

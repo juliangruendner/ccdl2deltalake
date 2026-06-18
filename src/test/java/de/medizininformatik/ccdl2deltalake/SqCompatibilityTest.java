@@ -46,8 +46,9 @@ class SqCompatibilityTest {
 
     @BeforeAll
     static void setup() throws Exception {
-        try (var stream = SqCompatibilityTest.class.getResourceAsStream("/test-mapping.json")) {
-            ctx = MappingContext.fromJson(stream);
+        try (var ms = SqCompatibilityTest.class.getResourceAsStream("/test-mapping.json");
+             var td = SqCompatibilityTest.class.getResourceAsStream("/test-table-descriptions.json")) {
+            ctx = MappingContext.fromJson(ms, td);
         }
         translator = Translator.of(ctx);
     }

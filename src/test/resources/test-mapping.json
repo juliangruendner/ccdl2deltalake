@@ -4,7 +4,7 @@
     "key": { "system": "http://snomed.info/sct", "code": "37796009", "display": "Migraine (disorder)" },
     "tableName": "condition",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "dateFilter": { "path": "recordeddate", "type": "DATE" }
   },
   {
@@ -12,14 +12,14 @@
     "key": { "system": "http://snomed.info/sct", "code": "4556007", "display": "Gastritis (disorder)" },
     "tableName": "condition",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" }
+    "termCodeFilter": { "path": "code.coding" }
   },
   {
     "context": { "system": "fdpg.mii.cds", "code": "Diagnose", "display": "Diagnose", "version": "1.0.0" },
     "key": { "system": "http://fhir.de/CodeSystem/bfarm/icd-10-gm", "code": "E10-E14", "display": "Diabetes mellitus" },
     "tableName": "condition",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "dateFilter": { "path": "recordeddate", "type": "DATE" }
   },
   {
@@ -27,7 +27,7 @@
     "key": { "system": "http://fhir.de/CodeSystem/bfarm/icd-10-gm", "code": "E13.9", "display": "Sonstiger Diabetes: Ohne Komplikationen" },
     "tableName": "condition",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "dateFilter": { "path": "recordeddate", "type": "DATE" }
   },
   {
@@ -35,7 +35,7 @@
     "key": { "system": "http://fhir.de/CodeSystem/bfarm/icd-10-gm", "code": "E13.1", "display": "Sonstiger Diabetes: Mit Ketoazidose" },
     "tableName": "condition",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "dateFilter": { "path": "recordeddate", "type": "DATE" }
   },
   {
@@ -43,7 +43,7 @@
     "key": { "system": "http://fhir.de/CodeSystem/bfarm/icd-10-gm", "code": "E13", "display": "Sonstiger Diabetes mellitus" },
     "tableName": "condition",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "dateFilter": { "path": "recordeddate", "type": "DATE" }
   },
   {
@@ -51,7 +51,7 @@
     "key": { "system": "http://fhir.de/CodeSystem/bfarm/icd-10-gm", "code": "I08.0", "display": "Mitral- und Aortenklappenerkrankung" },
     "tableName": "condition",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "dateFilter": { "path": "recordeddate", "type": "DATE" }
   },
   {
@@ -59,7 +59,7 @@
     "key": { "system": "http://fhir.de/CodeSystem/bfarm/icd-10-gm", "code": "S14.11", "display": "Komplette Läsion des Halsmarks" },
     "tableName": "condition",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "dateFilter": { "path": "recordeddate", "type": "DATE" }
   },
   {
@@ -67,7 +67,7 @@
     "key": { "system": "http://loinc.org", "code": "26464-8", "display": "Leukocytes [#/volume] in Blood" },
     "tableName": "observation",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "valueFilter": { "type": "QUANTITY", "path": "valuequantity", "valueField": "value", "unitCodeField": "code" },
     "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
   },
@@ -76,7 +76,7 @@
     "key": { "system": "http://loinc.org", "code": "718-7", "display": "Hemoglobin [Mass/volume] in Blood" },
     "tableName": "observation",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "valueFilter": { "type": "QUANTITY", "path": "valuequantity", "valueField": "value", "unitCodeField": "code" },
     "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
   },
@@ -85,7 +85,7 @@
     "key": { "system": "http://loinc.org", "code": "800-3", "display": "Calcium.ionized [Moles/volume] in Blood" },
     "tableName": "observation",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "valueFilter": { "type": "QUANTITY", "path": "valuequantity", "valueField": "value", "unitCodeField": "code" },
     "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
   },
@@ -94,7 +94,7 @@
     "key": { "system": "http://snomed.info/sct", "code": "119364003", "display": "Serum specimen" },
     "tableName": "specimen",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "type.coding" },
+    "termCodeFilter": { "path": "type.coding" },
     "referenceAttributeFilters": [
       {
         "attributeCode": "festgestellteDiagnose",
@@ -113,7 +113,7 @@
     "key": { "system": "http://snomed.info/sct", "code": "396997002", "display": "Specimen from eye" },
     "tableName": "specimen",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "type.coding" },
+    "termCodeFilter": { "path": "type.coding" },
     "referenceAttributeFilters": [
       {
         "attributeCode": "festgestellteDiagnose",
@@ -133,7 +133,7 @@
     "tableName": "medicationadministration",
     "patientRefPath": "subject.reference",
     "termCodeFilter": {
-      "arrayPath": "code.coding",
+      "path": "code.coding",
       "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
     },
     "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
@@ -144,7 +144,7 @@
     "tableName": "medicationadministration",
     "patientRefPath": "subject.reference",
     "termCodeFilter": {
-      "arrayPath": "code.coding",
+      "path": "code.coding",
       "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
     },
     "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
@@ -155,7 +155,7 @@
     "tableName": "medicationadministration",
     "patientRefPath": "subject.reference",
     "termCodeFilter": {
-      "arrayPath": "code.coding",
+      "path": "code.coding",
       "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
     },
     "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
@@ -166,7 +166,7 @@
     "tableName": "medicationrequest",
     "patientRefPath": "subject.reference",
     "termCodeFilter": {
-      "arrayPath": "code.coding",
+      "path": "code.coding",
       "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
     },
     "dateFilter": { "path": "authoredon", "type": "DATE" }
@@ -177,7 +177,7 @@
     "tableName": "medicationrequest",
     "patientRefPath": "subject.reference",
     "termCodeFilter": {
-      "arrayPath": "code.coding",
+      "path": "code.coding",
       "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
     },
     "dateFilter": { "path": "authoredon", "type": "DATE" }
@@ -188,7 +188,7 @@
     "tableName": "medicationstatement",
     "patientRefPath": "subject.reference",
     "termCodeFilter": {
-      "arrayPath": "code.coding",
+      "path": "code.coding",
       "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
     },
     "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
@@ -199,7 +199,7 @@
     "tableName": "medicationstatement",
     "patientRefPath": "subject.reference",
     "termCodeFilter": {
-      "arrayPath": "code.coding",
+      "path": "code.coding",
       "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
     },
     "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
@@ -209,7 +209,7 @@
     "key": { "code": "726427004", "display": "Lobectomy of upper lobe of left lung", "system": "http://snomed.info/sct" },
     "tableName": "procedure",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "dateFilter": { "path": "performeddatetime", "type": "DATETIME" }
   },
   {
@@ -217,7 +217,7 @@
     "key": { "code": "5-403.05", "display": "Gastrektomie", "system": "http://fhir.de/CodeSystem/bfarm/ops" },
     "tableName": "procedure",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "dateFilter": { "path": "performeddatetime", "type": "DATETIME" }
   },
   {
@@ -225,7 +225,7 @@
     "key": { "code": "8-810", "display": "Transfusion von Vollblut", "system": "http://fhir.de/CodeSystem/bfarm/ops" },
     "tableName": "procedure",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "dateFilter": { "path": "performeddatetime", "type": "DATETIME" }
   },
   {
@@ -233,7 +233,7 @@
     "key": { "code": "5-39", "display": "Andere Operationen an Blutgefäßen", "system": "http://fhir.de/CodeSystem/bfarm/ops" },
     "tableName": "procedure",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "dateFilter": { "path": "performeddatetime", "type": "DATETIME" }
   },
   {
@@ -241,7 +241,7 @@
     "key": { "code": "6-002", "display": "Applikation von Medikamenten", "system": "http://fhir.de/CodeSystem/bfarm/ops" },
     "tableName": "procedure",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "dateFilter": { "path": "performeddatetime", "type": "DATETIME" }
   },
   {
@@ -249,7 +249,7 @@
     "key": { "code": "5-32", "display": "Operationen an der Lunge", "system": "http://fhir.de/CodeSystem/bfarm/ops" },
     "tableName": "procedure",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "dateFilter": { "path": "performeddatetime", "type": "DATETIME" }
   },
   {
@@ -257,7 +257,7 @@
     "key": { "code": "5-800", "display": "Offen chirurgische Operationen an den Gelenken", "system": "http://fhir.de/CodeSystem/bfarm/ops" },
     "tableName": "procedure",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "dateFilter": { "path": "performeddatetime", "type": "DATETIME" }
   },
   {
@@ -265,7 +265,7 @@
     "key": { "code": "5-45", "display": "Inzision an Dünn- und Dickdarm", "system": "http://fhir.de/CodeSystem/bfarm/ops" },
     "tableName": "procedure",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "dateFilter": { "path": "performeddatetime", "type": "DATETIME" }
   },
   {
@@ -273,7 +273,7 @@
     "key": { "code": "5-780", "display": "Inzision am Knochen", "system": "http://fhir.de/CodeSystem/bfarm/ops" },
     "tableName": "procedure",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "dateFilter": { "path": "performeddatetime", "type": "DATETIME" }
   },
   {
@@ -281,7 +281,7 @@
     "key": { "code": "5-781", "display": "Lokale Exzision von Knochengewebe", "system": "http://fhir.de/CodeSystem/bfarm/ops" },
     "tableName": "procedure",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "arrayPath": "code.coding" },
+    "termCodeFilter": { "path": "code.coding" },
     "dateFilter": { "path": "performeddatetime", "type": "DATETIME" }
   },
   {
@@ -289,7 +289,7 @@
     "key": { "code": "IMP", "display": "inpatient encounter", "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode" },
     "tableName": "encounter",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "singlePath": "class" },
+    "termCodeFilter": { "path": "class" },
     "dateFilter": { "path": "periodstart", "type": "DATE" }
   },
   {
@@ -311,6 +311,6 @@
     "key": { "code": "2.16.840.1.113883.3.1937.777.24.5.3.8", "display": "MDAT wissenschaftlich nutzen EU DSGVO NIVEAU", "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3" },
     "tableName": "consent",
     "patientRefPath": "subject.reference",
-    "termCodeFilter": { "chainedArrayPaths": ["provision.provision", "code", "coding"] }
+    "termCodeFilter": { "path": "provision.provision.code.coding" }
   }
 ]

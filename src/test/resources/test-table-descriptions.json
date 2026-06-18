@@ -1,0 +1,13 @@
+{
+  "condition":               { "arrays": ["code.coding"] },
+  "observation":             { "arrays": ["code.coding"] },
+  "specimen":                { "arrays": ["type.coding"] },
+  "procedure":               { "arrays": ["code.coding"] },
+  "encounter":               { "arrays": [] },
+  "patient":                 { "arrays": [] },
+  "consent":                 { "arrays": ["provision.provision", "provision.provision.code", "provision.provision.code.coding"] },
+  "medicationadministration": { "arrays": [] },
+  "medicationrequest":       { "arrays": [] },
+  "medicationstatement":     { "arrays": [] },
+  "medication":              { "arrays": ["code.coding"] }
+}

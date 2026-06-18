@@ -14,7 +14,7 @@
     "tableName": "condition",
     "patientRefPath": "subject.reference",
     "termCodeFilter": {
-      "arrayPath": "code.coding"
+      "path": "code.coding"
     },
     "dateFilter": {
       "path": "recordeddate",
@@ -36,7 +36,7 @@
     "tableName": "condition",
     "patientRefPath": "subject.reference",
     "termCodeFilter": {
-      "arrayPath": "code.coding"
+      "path": "code.coding"
     },
     "dateFilter": {
       "path": "recordeddate",
@@ -58,7 +58,7 @@
     "tableName": "condition",
     "patientRefPath": "subject.reference",
     "termCodeFilter": {
-      "arrayPath": "code.coding"
+      "path": "code.coding"
     },
     "dateFilter": {
       "path": "recordeddate",
@@ -80,7 +80,7 @@
     "tableName": "condition",
     "patientRefPath": "subject.reference",
     "termCodeFilter": {
-      "arrayPath": "code.coding"
+      "path": "code.coding"
     },
     "dateFilter": {
       "path": "recordeddate",
@@ -102,7 +102,7 @@
     "tableName": "condition",
     "patientRefPath": "subject.reference",
     "termCodeFilter": {
-      "arrayPath": "code.coding"
+      "path": "code.coding"
     },
     "dateFilter": {
       "path": "recordeddate",
@@ -124,7 +124,7 @@
     "tableName": "observation",
     "patientRefPath": "subject.reference",
     "termCodeFilter": {
-      "arrayPath": "code.coding"
+      "path": "code.coding"
     },
     "valueFilter": {
       "type": "QUANTITY",
@@ -152,7 +152,7 @@
     "tableName": "observation",
     "patientRefPath": "subject.reference",
     "termCodeFilter": {
-      "arrayPath": "code.coding"
+      "path": "code.coding"
     },
     "valueFilter": {
       "type": "QUANTITY",
@@ -180,7 +180,7 @@
     "tableName": "observation",
     "patientRefPath": "subject.reference",
     "termCodeFilter": {
-      "arrayPath": "code.coding"
+      "path": "code.coding"
     },
     "valueFilter": {
       "type": "QUANTITY",
@@ -208,7 +208,7 @@
     "tableName": "medicationadministration",
     "patientRefPath": "subject.reference",
     "termCodeFilter": {
-      "arrayPath": "code.coding",
+      "path": "code.coding",
       "join": {
         "table": "medication",
         "primaryRefPath": "medicationreference.reference",
