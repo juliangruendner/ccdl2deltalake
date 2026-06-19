@@ -201,7 +201,7 @@ WHERE ... AND bodysite_tc.system = 'urn:oid:...' AND bodysite_tc.code IN ('C44.6
 
 ---
 
-## Gap 6 — Non-standard context (`Procedure Category`)
+## ~~Gap 6 — Non-standard context (`Procedure Category`)~~ ✓ DONE
 
 **Affected SQs:**
 - `NonPrimarySearchPathSQ.json`
@@ -210,4 +210,7 @@ WHERE ... AND bodysite_tc.system = 'urn:oid:...' AND bodysite_tc.code IN ('C44.6
 Context code `"Procedure Category"` (`system: "fdpg.mii.cds"`) is not a standard MII CDS
 context and has no FHIR resource or Pathling Delta Lake table backing it.
 
-**Resolution:** No implementation planned — document as unsupported in the translator.
+**Resolution:** Added a mapping entry with `termCodeFilter.path = "category.coding"` pointing at
+`Procedure.category` in the Delta Lake table. Since paths are always explicit in our mapping
+(unlike sq2cql which infers them from a primary search parameter), this required no translator
+changes — only a new mapping entry and `category.coding` added to procedure's table description arrays.

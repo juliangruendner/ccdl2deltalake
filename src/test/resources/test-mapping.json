@@ -220,6 +220,14 @@
     "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
   },
   {
+    "context": { "code": "Procedure Category", "display": "Prozedurenkategorie", "system": "fdpg.mii.cds", "version": "1.0.0" },
+    "key": { "code": "387713003", "display": "Surgical procedure", "system": "http://snomed.info/sct" },
+    "tableName": "procedure",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "category.coding" },
+    "dateFilter": { "path": "performeddatetime", "type": "DATETIME" }
+  },
+  {
     "context": { "code": "Procedure", "display": "Prozedur", "system": "fdpg.mii.cds", "version": "1.0.0" },
     "key": { "code": "726427004", "display": "Lobectomy of upper lobe of left lung", "system": "http://snomed.info/sct" },
     "tableName": "procedure",

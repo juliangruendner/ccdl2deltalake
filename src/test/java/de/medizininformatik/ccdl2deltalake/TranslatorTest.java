@@ -322,6 +322,20 @@ class TranslatorTest {
     }
 
     @Test
+    void nonPrimarySearchPath_procedureCategoryTermCode() throws Exception {
+        var json = java.nio.file.Files.readString(
+            java.nio.file.Path.of("src/test/resources/ccdl/NonPrimarySearchPathSQ.json"));
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var query = mapper.readValue(json, StructuredQuery.class);
+        var sql = SqlWriter.write("non_primary_search_path", translator.toSql(query));
+
+        assertThat(sql).contains("FROM fhir.default.procedure t");
+        assertThat(sql).contains("CROSS JOIN UNNEST(t.category.coding) AS tc");
+        assertThat(sql).contains("tc.system = 'http://snomed.info/sct'");
+        assertThat(sql).contains("tc.code IN ('387713003')");
+    }
+
+    @Test
     void complexCcdl_translatesAndPrintsOutput() throws Exception {
         var json = Files.readString(Path.of("src/test/resources/ccdl/complex-ccdl.json"));
         var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
