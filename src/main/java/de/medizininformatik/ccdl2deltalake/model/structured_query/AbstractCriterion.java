@@ -52,10 +52,12 @@ abstract class AbstractCriterion implements Criterion {
                                        String additionalWhere, MappingContext ctx) {
         var refFragments = buildRefFilterFragments(catalog, mapping, ctx);
         var simpleAttrConditions = buildSimpleAttributeWhereConditions(mapping);
+        var codingAttrFragments = buildCodingAttributeFragments(mapping, ctx);
 
         // Patient-like resources: no term-code array — just apply other conditions
         if (mapping.getTermCodeFilter().isEmpty()) {
-            return buildNoTermCodeSql(catalog, mapping, additionalWhere, simpleAttrConditions, refFragments);
+            return buildNoTermCodeSql(catalog, mapping, additionalWhere, simpleAttrConditions,
+                refFragments, codingAttrFragments);
         }
 
         Map<String, List<TermCode>> bySystem = codes.stream()
@@ -93,6 +95,10 @@ abstract class AbstractCriterion implements Criterion {
                 sb.append(frag.fromClause());
             }
 
+            for (var frag : codingAttrFragments) {
+                sb.append(frag.fromClause());
+            }
+
             String termPfx = resolution.terminalAlias()
                 + (resolution.remainingPath().isEmpty() ? "" : "." + resolution.remainingPath());
 
@@ -114,6 +120,10 @@ abstract class AbstractCriterion implements Criterion {
                 sb.append("\n  AND ").append(cond);
             }
 
+            for (var frag : codingAttrFragments) {
+                sb.append("\n  AND ").append(frag.whereCondition());
+            }
+
             for (var frag : refFragments) {
                 sb.append("\n  AND ").append(frag.whereCondition());
             }
@@ -133,12 +143,14 @@ abstract class AbstractCriterion implements Criterion {
      */
     private String buildNoTermCodeSql(String catalog, Mapping mapping, String additionalWhere,
                                        List<String> simpleAttrConditions,
-                                       List<RefFilterFragment> refFragments) {
+                                       List<RefFilterFragment> refFragments,
+                                       List<CodingAttrFragment> codingAttrFragments) {
         var sb = new StringBuilder();
         sb.append("SELECT DISTINCT ").append(patientIdExpr(mapping)).append(" AS patient_id\n");
         sb.append("FROM ").append(catalog).append(".").append(mapping.tableName()).append(" t\n");
 
         for (var frag : refFragments) sb.append(frag.fromClause());
+        for (var frag : codingAttrFragments) sb.append(frag.fromClause());
 
         boolean hasWhere = false;
 
@@ -157,6 +169,11 @@ abstract class AbstractCriterion implements Criterion {
 
         for (var cond : simpleAttrConditions) {
             sb.append(hasWhere ? "\n  AND " : "WHERE ").append(cond);
+            hasWhere = true;
+        }
+
+        for (var frag : codingAttrFragments) {
+            sb.append(hasWhere ? "\n  AND " : "WHERE ").append(frag.whereCondition());
             hasWhere = true;
         }
 
@@ -276,6 +293,51 @@ abstract class AbstractCriterion implements Criterion {
         return fragments;
     }
 
+    private record CodingAttrFragment(String fromClause, String whereCondition) {}
+
+    private List<CodingAttrFragment> buildCodingAttributeFragments(Mapping mapping, MappingContext ctx) {
+        var fragments = new ArrayList<CodingAttrFragment>();
+        int i = 0;
+        for (var af : attributeFilters) {
+            if (!"concept".equals(af.type())) continue;
+            var cfg = mapping.findSimpleAttributeFilter(af.attributeCode().code()).orElse(null);
+            if (cfg == null || !cfg.isCodeableConcept()) continue;
+
+            String alias = "attr_tc" + i;
+            String codingPath = cfg.path() + ".coding";
+            var resolution = ctx.resolveTermCodePath(mapping.tableName(), codingPath, "t", alias);
+
+            String fromClause = String.join("", resolution.unnestClauses());
+            if (fromClause.isEmpty()) {
+                fromClause = "CROSS JOIN UNNEST(t." + codingPath + ") AS " + alias + "\n";
+            }
+
+            var bySystem = new LinkedHashMap<String, List<String>>();
+            for (var tc : af.selectedConcepts()) {
+                bySystem.computeIfAbsent(tc.system(), k -> new ArrayList<>()).add(tc.code());
+            }
+
+            String termPfx = resolution.terminalAlias()
+                + (resolution.remainingPath().isEmpty() ? "" : "." + resolution.remainingPath());
+
+            var sysConditions = bySystem.entrySet().stream().map(e -> {
+                String inClause = e.getValue().stream()
+                    .map(c -> "'" + escape(c) + "'")
+                    .collect(Collectors.joining(", "));
+                return termPfx + ".system = '" + escape(e.getKey()) + "'"
+                    + " AND " + termPfx + ".code IN (" + inClause + ")";
+            }).toList();
+
+            String whereCondition = sysConditions.size() == 1
+                ? sysConditions.get(0)
+                : "(\n    " + String.join("\n    OR ", sysConditions) + "\n  )";
+
+            fragments.add(new CodingAttrFragment(fromClause, whereCondition));
+            i++;
+        }
+        return fragments;
+    }
+
     private List<String> buildSimpleAttributeWhereConditions(Mapping mapping) {
         var conditions = new ArrayList<String>();
         for (var af : attributeFilters) {
@@ -307,6 +369,7 @@ abstract class AbstractCriterion implements Criterion {
                     }
                 }
                 case "concept" -> {
+                    if (cfg.isCodeableConcept()) break; // handled by buildCodingAttributeFragments
                     String inClause = af.selectedConcepts().stream()
                         .map(tc -> "'" + escape(tc.code()) + "'")
                         .collect(Collectors.joining(", "));

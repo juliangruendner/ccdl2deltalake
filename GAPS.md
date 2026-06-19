@@ -171,7 +171,7 @@ This would need a completely separate query pattern against a pre-computed conse
 
 ---
 
-## Gap 5 — Body-site concept attribute filter (`CodeableConcept` array)
+## ~~Gap 5 — Body-site concept attribute filter (`CodeableConcept` array)~~ ✓ DONE
 
 **Affected SQs:**
 - `SpecimenSQAndBodySite.json` (`icd-o-3` attribute, `selectedConcepts: [C44.6]`)

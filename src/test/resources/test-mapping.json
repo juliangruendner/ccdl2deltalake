@@ -95,6 +95,7 @@
     "tableName": "specimen",
     "patientRefPath": "subject.reference",
     "termCodeFilter": { "path": "type.coding" },
+    "dateFilter": { "path": "collection.collecteddatetime", "type": "DATETIME" },
     "referenceAttributeFilters": [
       {
         "attributeCode": "festgestellteDiagnose",
@@ -105,7 +106,8 @@
     ],
     "simpleAttributeFilters": [
       { "attributeCode": "specimenStatus", "path": "status" },
-      { "attributeCode": "specimenAmount", "path": "collection.quantity", "valueField": "value", "unitCodeField": "code" }
+      { "attributeCode": "specimenAmount", "path": "collection.quantity", "valueField": "value", "unitCodeField": "code" },
+      { "attributeCode": "icd-o-3", "type": "CodeableConcept", "path": "collection.bodysite" }
     ]
   },
   {
@@ -114,6 +116,7 @@
     "tableName": "specimen",
     "patientRefPath": "subject.reference",
     "termCodeFilter": { "path": "type.coding" },
+    "dateFilter": { "path": "collection.collecteddatetime", "type": "DATETIME" },
     "referenceAttributeFilters": [
       {
         "attributeCode": "festgestellteDiagnose",
@@ -124,7 +127,8 @@
     ],
     "simpleAttributeFilters": [
       { "attributeCode": "specimenStatus", "path": "status" },
-      { "attributeCode": "specimenAmount", "path": "collection.quantity", "valueField": "value", "unitCodeField": "code" }
+      { "attributeCode": "specimenAmount", "path": "collection.quantity", "valueField": "value", "unitCodeField": "code" },
+      { "attributeCode": "icd-o-3", "type": "CodeableConcept", "path": "collection.bodysite" }
     ]
   },
   {
@@ -152,6 +156,17 @@
   {
     "context": { "code": "Medikamentenverabreichung", "display": "Verabreichung von Medikamenten", "system": "fdpg.mii.cds", "version": "1.0.0" },
     "key": { "code": "P01CA", "display": "Metronidazol und ähnliche Mittel", "system": "http://fhir.de/CodeSystem/bfarm/atc" },
+    "tableName": "medicationadministration",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "path": "code.coding",
+      "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
+    },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "code": "Medikamentenverabreichung", "display": "Verabreichung von Medikamenten", "system": "fdpg.mii.cds", "version": "1.0.0" },
+    "key": { "code": "R03DA", "display": "Xanthine", "system": "http://fhir.de/CodeSystem/bfarm/atc" },
     "tableName": "medicationadministration",
     "patientRefPath": "subject.reference",
     "termCodeFilter": {
@@ -290,7 +305,13 @@
     "tableName": "encounter",
     "patientRefPath": "subject.reference",
     "termCodeFilter": { "path": "class" },
-    "dateFilter": { "path": "periodstart", "type": "DATE" }
+    "dateFilter": { "path": "periodstart", "type": "DATE" },
+    "simpleAttributeFilters": [
+      { "attributeCode": "Fachabteilungsschluessel", "type": "CodeableConcept", "path": "servicetype" },
+      { "attributeCode": "ErweiterterFachabteilungsschluessel", "type": "CodeableConcept", "path": "servicetype" },
+      { "attributeCode": "Kontaktebene", "type": "CodeableConcept", "path": "type" },
+      { "attributeCode": "KontaktArt", "type": "CodeableConcept", "path": "type" }
+    ]
   },
   {
     "context": { "code": "Patient", "display": "Patient", "system": "fdpg.mii.cds", "version": "1.0.0" },

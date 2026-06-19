@@ -1,9 +1,9 @@
 {
   "condition":               { "arrays": ["code.coding"] },
   "observation":             { "arrays": ["code.coding"] },
-  "specimen":                { "arrays": ["type.coding"] },
+  "specimen":                { "arrays": ["type.coding", "collection.bodysite.coding"] },
   "procedure":               { "arrays": ["code.coding"] },
-  "encounter":               { "arrays": [] },
+  "encounter":               { "arrays": ["type", "type.coding", "servicetype.coding"] },
   "patient":                 { "arrays": [] },
   "consent":                 { "arrays": ["provision.provision", "provision.provision.code", "provision.provision.code.coding"] },
   "medicationadministration": { "arrays": [] },

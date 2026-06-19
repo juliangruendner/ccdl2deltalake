@@ -304,6 +304,33 @@ class TranslatorTest {
     }
 
     @Test
+    void codeableConceptAttributeFilter_generatesUnnestSql() throws Exception {
+        var json = java.nio.file.Files.readString(
+            java.nio.file.Path.of("src/test/resources/ccdl/SpecimenSQAndBodySite.json"));
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var query = mapper.readValue(json, StructuredQuery.class);
+        var sql = SqlWriter.write("codeable_concept_attr_filter", translator.toSql(query));
+
+        assertThat(sql).contains("FROM fhir.default.specimen t");
+        assertThat(sql).contains("CROSS JOIN UNNEST(t.type.coding) AS tc");
+        assertThat(sql).contains("CROSS JOIN UNNEST(t.collection.bodysite.coding) AS attr_tc0");
+        assertThat(sql).contains("attr_tc0.system = 'urn:oid:2.16.840.1.113883.6.43.1'");
+        assertThat(sql).contains("attr_tc0.code IN ('C44.6')");
+        // reference filter also present
+        assertThat(sql).contains("INNER JOIN fhir.default.condition ref0");
+        assertThat(sql).contains("ref_tc0.code IN ('E13.9')");
+    }
+
+    @Test
+    void complexCcdl_translatesAndPrintsOutput() throws Exception {
+        var json = Files.readString(Path.of("src/test/resources/ccdl/complex-ccdl.json"));
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var query = mapper.readValue(json, StructuredQuery.class);
+        var sql = SqlWriter.write("complex-ccdl", translator.toSql(query));
+        System.out.println("=== complex-ccdl SQL ===\n" + sql);
+    }
+
+    @Test
     void testNew() throws Exception {
         MappingContext ctxWithTree;
         try (var ms = TranslatorTest.class.getResourceAsStream("/test-mapping.json");
