@@ -12,7 +12,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Translates a CCDL {@link StructuredQuery} into a Trino SQL query against Delta Lake tables.
  *
- * <p>The generated SQL returns a single-column result set {@code (patient_id VARCHAR)}.
+ * <p>The generated SQL returns {@code SELECT COUNT(*) AS patient_count} over the patient set.
  * Inclusion criteria are combined as CNF (INTERSECT of UNIONs).
  * Exclusion criteria are combined as DNF (UNION of INTERSECTs) and subtracted with EXCEPT.
  *
@@ -42,16 +42,17 @@ public class Translator {
         String inclusionSql = buildInclusion(query.inclusionCriteria());
         boolean hasExclusion = query.exclusionCriteria().stream().anyMatch(g -> !g.isEmpty());
 
+        String innerSql;
         if (!hasExclusion) {
-            return inclusionSql;
+            innerSql = inclusionSql;
+        } else {
+            String exclusionSql = buildExclusion(query.exclusionCriteria());
+            innerSql = exclusionSql.isBlank()
+                ? inclusionSql
+                : "(\n" + inclusionSql + "\n)\nEXCEPT\n(\n" + exclusionSql + "\n)";
         }
 
-        String exclusionSql = buildExclusion(query.exclusionCriteria());
-        if (exclusionSql.isBlank()) {
-            return inclusionSql;
-        }
-
-        return "(\n" + inclusionSql + "\n)\nEXCEPT\n(\n" + exclusionSql + "\n)";
+        return "SELECT COUNT(*) AS patient_count FROM (\n" + innerSql + "\n)";
     }
 
     /** CNF: outer list items are AND-ed (INTERSECT); inner list items are OR-ed (UNION). */
