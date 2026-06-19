@@ -369,12 +369,8 @@ class TranslatorTest {
     static void setupWithExampleTree() throws IOException {
         try (var ms = TranslatorTest.class.getResourceAsStream("/test-mapping.json");
              var td = TranslatorTest.class.getResourceAsStream("/test-table-descriptions.json");
-             var ts = java.io.FileInputStream.class
-                 .getConstructor(String.class)
-                 .newInstance("/Users/pi19vypi/code/example-mapping/tree.json")) {
+             var ts = TranslatorTest.class.getResourceAsStream("/tree.json")) {
             ctxWithExampleTree = MappingContext.fromJson(ms, td, ts);
-        } catch (Exception e) {
-            throw new IOException(e);
         }
         translatorWithExampleTree = Translator.of(ctxWithExampleTree);
     }
@@ -418,15 +414,16 @@ class TranslatorTest {
     void monitoring_procedureEndocronologicalFunction() throws Exception {
         var sql = translateMonitoring("procedure-endocronological-function");
         assertThat(sql).contains("FROM fhir.default.procedure t");
-        assertThat(sql).contains("CROSS JOIN UNNEST(t.code.coding) AS tc");
         assertThat(sql).contains("tc.system = 'http://fhir.de/CodeSystem/bfarm/ops'");
+        // OPS 3-20 and 8-19 must expand to child codes via tree
+        assertThat(sql).contains("'3-200'");
+        assertThat(sql).contains("'8-190'");
     }
 
     @Test
     void monitoring_specimenTest() throws Exception {
         var sql = translateMonitoring("specimen-test");
         assertThat(sql).contains("FROM fhir.default.specimen t");
-        assertThat(sql).contains("CROSS JOIN UNNEST(t.type.coding) AS tc");
         assertThat(sql).contains("'119297000'");
         assertThat(sql).contains("'119361006'");
         assertThat(sql).contains("UNION");
@@ -442,11 +439,12 @@ class TranslatorTest {
     @Test
     void monitoring_medicationAdministrationAntidiab() throws Exception {
         var sql = translateMonitoring("medication-administration-antidiab");
-        // three contexts UNIONed
         assertThat(sql).contains("fhir.default.medicationadministration");
         assertThat(sql).contains("fhir.default.medicationstatement");
         assertThat(sql).contains("fhir.default.medicationrequest");
-        assertThat(sql).contains("UNION");
+        // ATC A10 must expand to child codes via tree
+        assertThat(sql).contains("'A10A'");
+        assertThat(sql).contains("'A10B'");
     }
 
 }

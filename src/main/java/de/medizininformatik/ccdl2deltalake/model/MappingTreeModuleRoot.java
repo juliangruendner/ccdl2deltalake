@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.function.Function.identity;
+import static java.util.Objects.requireNonNull;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record MappingTreeModuleRoot(TermCode context, String system, Map<String, MappingTreeModuleEntry> entries) {
@@ -20,6 +21,7 @@ public record MappingTreeModuleRoot(TermCode context, String system, Map<String,
         @JsonProperty("system") String system,
         @JsonProperty("entries") List<MappingTreeModuleEntry> entries
     ) {
+        requireNonNull(context, "tree module must have a context");
         return new MappingTreeModuleRoot(
             context,
             system,
