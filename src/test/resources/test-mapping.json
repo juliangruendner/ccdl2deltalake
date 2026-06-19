@@ -64,6 +64,86 @@
   },
   {
     "context": { "system": "fdpg.mii.cds", "code": "Laboruntersuchung", "display": "Laboruntersuchung", "version": "1.0.0" },
+    "key": { "system": "http://loinc.org", "code": "59260-0", "display": "Hemoglobin [Moles/volume] in Blood" },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "code.coding" },
+    "valueFilter": { "type": "QUANTITY", "path": "valuequantity", "valueField": "value", "unitCodeField": "code" },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Laboruntersuchung", "display": "Laboruntersuchung", "version": "1.0.0" },
+    "key": { "system": "http://loinc.org", "code": "17856-6", "display": "Hemoglobin A1c/Hemoglobin.total in Blood by HPLC" },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "code.coding" },
+    "valueFilter": { "type": "QUANTITY", "path": "valuequantity", "valueField": "value", "unitCodeField": "code" },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Laboruntersuchung", "display": "Laboruntersuchung", "version": "1.0.0" },
+    "key": { "system": "http://loinc.org", "code": "4548-4", "display": "Hemoglobin A1c/Hemoglobin.total in Blood" },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "code.coding" },
+    "valueFilter": { "type": "QUANTITY", "path": "valuequantity", "valueField": "value", "unitCodeField": "code" },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Laboruntersuchung", "display": "Laboruntersuchung", "version": "1.0.0" },
+    "key": { "system": "http://loinc.org", "code": "4549-2", "display": "Hemoglobin A1c/Hemoglobin.total in Blood by Electrophoresis" },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "code.coding" },
+    "valueFilter": { "type": "QUANTITY", "path": "valuequantity", "valueField": "value", "unitCodeField": "code" },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Laboruntersuchung", "display": "Laboruntersuchung", "version": "1.0.0" },
+    "key": { "system": "http://loinc.org", "code": "20509-6", "display": "Hemoglobin [Mass/volume] in Blood by calculation" },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "code.coding" },
+    "valueFilter": { "type": "QUANTITY", "path": "valuequantity", "valueField": "value", "unitCodeField": "code" },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Laboruntersuchung", "display": "Laboruntersuchung", "version": "1.0.0" },
+    "key": { "system": "http://loinc.org", "code": "30352-9", "display": "Hemoglobin [Mass/volume] in Capillary blood" },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "code.coding" },
+    "valueFilter": { "type": "QUANTITY", "path": "valuequantity", "valueField": "value", "unitCodeField": "code" },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Laboruntersuchung", "display": "Laboruntersuchung", "version": "1.0.0" },
+    "key": { "system": "http://loinc.org", "code": "94500-6", "display": "SARS-CoV-2 (COVID-19) RNA [Presence] in Respiratory system specimen by NAA" },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "code.coding" },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Laboruntersuchung", "display": "Laboruntersuchung", "version": "1.0.0" },
+    "key": { "system": "http://loinc.org", "code": "93846-4", "display": "Hemoglobin [Moles/volume] in Venous blood" },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "code.coding" },
+    "valueFilter": { "type": "QUANTITY", "path": "valuequantity", "valueField": "value", "unitCodeField": "code" },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Laboruntersuchung", "display": "Laboruntersuchung", "version": "1.0.0" },
+    "key": { "system": "http://loinc.org", "code": "75928-2", "display": "Hemoglobin [Moles/volume] in Arterial blood" },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "code.coding" },
+    "valueFilter": { "type": "QUANTITY", "path": "valuequantity", "valueField": "value", "unitCodeField": "code" },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Laboruntersuchung", "display": "Laboruntersuchung", "version": "1.0.0" },
     "key": { "system": "http://loinc.org", "code": "26464-8", "display": "Leukocytes [#/volume] in Blood" },
     "tableName": "observation",
     "patientRefPath": "subject.reference",
@@ -132,6 +212,132 @@
     ]
   },
   {
+    "context": { "system": "fdpg.mii.cds", "code": "Specimen", "display": "Bioprobe", "version": "1.0.0" },
+    "key": { "system": "http://snomed.info/sct", "code": "119297000", "display": "Blood specimen" },
+    "tableName": "specimen",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "type.coding" },
+    "dateFilter": { "path": "collection.collecteddatetime", "type": "DATETIME" },
+    "referenceAttributeFilters": [
+      {
+        "attributeCode": "festgestellteDiagnose",
+        "extensionUrl": "https://www.medizininformatik-initiative.de/fhir/ext/modul-biobank/StructureDefinition/Diagnose",
+        "extensionArrayPath": "_extension",
+        "referenceValuePath": "valuereference.reference"
+      }
+    ],
+    "simpleAttributeFilters": [
+      { "attributeCode": "specimenStatus", "path": "status" },
+      { "attributeCode": "specimenAmount", "path": "collection.quantity", "valueField": "value", "unitCodeField": "code" },
+      { "attributeCode": "icd-o-3", "type": "CodeableConcept", "path": "collection.bodysite" }
+    ]
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Specimen", "display": "Bioprobe", "version": "1.0.0" },
+    "key": { "system": "http://snomed.info/sct", "code": "119361006", "display": "Plasma specimen" },
+    "tableName": "specimen",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "type.coding" },
+    "dateFilter": { "path": "collection.collecteddatetime", "type": "DATETIME" },
+    "referenceAttributeFilters": [
+      {
+        "attributeCode": "festgestellteDiagnose",
+        "extensionUrl": "https://www.medizininformatik-initiative.de/fhir/ext/modul-biobank/StructureDefinition/Diagnose",
+        "extensionArrayPath": "_extension",
+        "referenceValuePath": "valuereference.reference"
+      }
+    ],
+    "simpleAttributeFilters": [
+      { "attributeCode": "specimenStatus", "path": "status" },
+      { "attributeCode": "specimenAmount", "path": "collection.quantity", "valueField": "value", "unitCodeField": "code" },
+      { "attributeCode": "icd-o-3", "type": "CodeableConcept", "path": "collection.bodysite" }
+    ]
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Specimen", "display": "Bioprobe", "version": "1.0.0" },
+    "key": { "system": "http://snomed.info/sct", "code": "441652008", "display": "Formalin-fixed paraffin-embedded tissue specimen" },
+    "tableName": "specimen",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "type.coding" },
+    "dateFilter": { "path": "collection.collecteddatetime", "type": "DATETIME" },
+    "referenceAttributeFilters": [
+      {
+        "attributeCode": "festgestellteDiagnose",
+        "extensionUrl": "https://www.medizininformatik-initiative.de/fhir/ext/modul-biobank/StructureDefinition/Diagnose",
+        "extensionArrayPath": "_extension",
+        "referenceValuePath": "valuereference.reference"
+      }
+    ],
+    "simpleAttributeFilters": [
+      { "attributeCode": "specimenStatus", "path": "status" },
+      { "attributeCode": "specimenAmount", "path": "collection.quantity", "valueField": "value", "unitCodeField": "code" },
+      { "attributeCode": "icd-o-3", "type": "CodeableConcept", "path": "collection.bodysite" }
+    ]
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Specimen", "display": "Bioprobe", "version": "1.0.0" },
+    "key": { "system": "http://snomed.info/sct", "code": "441479001", "display": "Fresh tissue specimen" },
+    "tableName": "specimen",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "type.coding" },
+    "dateFilter": { "path": "collection.collecteddatetime", "type": "DATETIME" },
+    "referenceAttributeFilters": [
+      {
+        "attributeCode": "festgestellteDiagnose",
+        "extensionUrl": "https://www.medizininformatik-initiative.de/fhir/ext/modul-biobank/StructureDefinition/Diagnose",
+        "extensionArrayPath": "_extension",
+        "referenceValuePath": "valuereference.reference"
+      }
+    ],
+    "simpleAttributeFilters": [
+      { "attributeCode": "specimenStatus", "path": "status" },
+      { "attributeCode": "specimenAmount", "path": "collection.quantity", "valueField": "value", "unitCodeField": "code" },
+      { "attributeCode": "icd-o-3", "type": "CodeableConcept", "path": "collection.bodysite" }
+    ]
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Specimen", "display": "Bioprobe", "version": "1.0.0" },
+    "key": { "system": "http://snomed.info/sct", "code": "258580003", "display": "Whole blood" },
+    "tableName": "specimen",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "type.coding" },
+    "dateFilter": { "path": "collection.collecteddatetime", "type": "DATETIME" },
+    "referenceAttributeFilters": [
+      {
+        "attributeCode": "festgestellteDiagnose",
+        "extensionUrl": "https://www.medizininformatik-initiative.de/fhir/ext/modul-biobank/StructureDefinition/Diagnose",
+        "extensionArrayPath": "_extension",
+        "referenceValuePath": "valuereference.reference"
+      }
+    ],
+    "simpleAttributeFilters": [
+      { "attributeCode": "specimenStatus", "path": "status" },
+      { "attributeCode": "specimenAmount", "path": "collection.quantity", "valueField": "value", "unitCodeField": "code" },
+      { "attributeCode": "icd-o-3", "type": "CodeableConcept", "path": "collection.bodysite" }
+    ]
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Specimen", "display": "Bioprobe", "version": "1.0.0" },
+    "key": { "system": "http://snomed.info/sct", "code": "119342007", "display": "Saliva Specimen" },
+    "tableName": "specimen",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "type.coding" },
+    "dateFilter": { "path": "collection.collecteddatetime", "type": "DATETIME" },
+    "referenceAttributeFilters": [
+      {
+        "attributeCode": "festgestellteDiagnose",
+        "extensionUrl": "https://www.medizininformatik-initiative.de/fhir/ext/modul-biobank/StructureDefinition/Diagnose",
+        "extensionArrayPath": "_extension",
+        "referenceValuePath": "valuereference.reference"
+      }
+    ],
+    "simpleAttributeFilters": [
+      { "attributeCode": "specimenStatus", "path": "status" },
+      { "attributeCode": "specimenAmount", "path": "collection.quantity", "valueField": "value", "unitCodeField": "code" },
+      { "attributeCode": "icd-o-3", "type": "CodeableConcept", "path": "collection.bodysite" }
+    ]
+  },
+  {
     "context": { "code": "Medikamentenverabreichung", "display": "Verabreichung von Medikamenten", "system": "fdpg.mii.cds", "version": "1.0.0" },
     "key": { "code": "B01AB01", "display": "Ölsäure-Derivate", "system": "http://fhir.de/CodeSystem/bfarm/atc" },
     "tableName": "medicationadministration",
@@ -163,6 +369,72 @@
       "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
     },
     "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "code": "Medikamentenverabreichung", "display": "Verabreichung von Medikamenten", "system": "fdpg.mii.cds", "version": "1.0.0" },
+    "key": { "code": "A10", "display": "Antidiabetika", "system": "http://fhir.de/CodeSystem/bfarm/atc" },
+    "tableName": "medicationadministration",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "path": "code.coding",
+      "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
+    },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "code": "Medikamentenverabreichung", "display": "Verabreichung von Medikamenten", "system": "fdpg.mii.cds", "version": "1.0.0" },
+    "key": { "code": "L03AA02", "display": "Filgrastim", "system": "http://fhir.de/CodeSystem/bfarm/atc" },
+    "tableName": "medicationadministration",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "path": "code.coding",
+      "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
+    },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "code": "Medikamentenverordnung", "display": "Verordnung von Medikamenten", "system": "fdpg.mii.cds", "version": "1.0.0" },
+    "key": { "code": "A10", "display": "Antidiabetika", "system": "http://fhir.de/CodeSystem/bfarm/atc" },
+    "tableName": "medicationstatement",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "path": "code.coding",
+      "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
+    },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "code": "Medikamentenverordnung", "display": "Verordnung von Medikamenten", "system": "fdpg.mii.cds", "version": "1.0.0" },
+    "key": { "code": "L03AA02", "display": "Filgrastim", "system": "http://fhir.de/CodeSystem/bfarm/atc" },
+    "tableName": "medicationstatement",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "path": "code.coding",
+      "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
+    },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "code": "Medikamentenanordnung", "display": "Anordnung von Medikamenten", "system": "fdpg.mii.cds", "version": "1.0.0" },
+    "key": { "code": "A10", "display": "Antidiabetika", "system": "http://fhir.de/CodeSystem/bfarm/atc" },
+    "tableName": "medicationrequest",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "path": "code.coding",
+      "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
+    },
+    "dateFilter": { "path": "authoredon", "type": "DATE" }
+  },
+  {
+    "context": { "code": "Medikamentenanordnung", "display": "Anordnung von Medikamenten", "system": "fdpg.mii.cds", "version": "1.0.0" },
+    "key": { "code": "L03AA02", "display": "Filgrastim", "system": "http://fhir.de/CodeSystem/bfarm/atc" },
+    "tableName": "medicationrequest",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": {
+      "path": "code.coding",
+      "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
+    },
+    "dateFilter": { "path": "authoredon", "type": "DATE" }
   },
   {
     "context": { "code": "Medikamentenverabreichung", "display": "Verabreichung von Medikamenten", "system": "fdpg.mii.cds", "version": "1.0.0" },
@@ -218,6 +490,22 @@
       "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
     },
     "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "code": "Procedure", "display": "Prozedur", "system": "fdpg.mii.cds", "version": "1.0.0" },
+    "key": { "code": "3-20", "display": "Computertomographie [CT], nativ", "system": "http://fhir.de/CodeSystem/bfarm/ops" },
+    "tableName": "procedure",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "code.coding" },
+    "dateFilter": { "path": "performeddatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "code": "Procedure", "display": "Prozedur", "system": "fdpg.mii.cds", "version": "1.0.0" },
+    "key": { "code": "8-19", "display": "Verbände und Entfernung von erkranktem Gewebe an Haut und Unterhaut", "system": "http://fhir.de/CodeSystem/bfarm/ops" },
+    "tableName": "procedure",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "code.coding" },
+    "dateFilter": { "path": "performeddatetime", "type": "DATETIME" }
   },
   {
     "context": { "code": "Procedure Category", "display": "Prozedurenkategorie", "system": "fdpg.mii.cds", "version": "1.0.0" },

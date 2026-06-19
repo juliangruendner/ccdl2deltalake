@@ -1,0 +1,104 @@
+{
+  "version": "http://to_be_decided.com/draft-1/schema#",
+  "display": "",
+  "inclusionCriteria": [
+    [
+      {
+        "termCodes": [
+          {
+            "code": "119297000",
+            "system": "http://snomed.info/sct",
+            "version": "http://snomed.info/sct/900000000000207008/version/20240501",
+            "display": "Blood specimen"
+          }
+        ],
+        "context": {
+          "code": "Specimen",
+          "system": "fdpg.mii.cds",
+          "version": "1.0.0",
+          "display": "Bioprobe"
+        }
+      },
+      {
+        "termCodes": [
+          {
+            "code": "119361006",
+            "system": "http://snomed.info/sct",
+            "version": "http://snomed.info/sct/900000000000207008/version/20240501",
+            "display": "Plasma specimen"
+          }
+        ],
+        "context": {
+          "code": "Specimen",
+          "system": "fdpg.mii.cds",
+          "version": "1.0.0",
+          "display": "Bioprobe"
+        }
+      },
+      {
+        "termCodes": [
+          {
+            "code": "441652008",
+            "system": "http://snomed.info/sct",
+            "version": "http://snomed.info/sct/900000000000207008/version/20240501",
+            "display": "Formalin-fixed paraffin-embedded tissue specimen"
+          }
+        ],
+        "context": {
+          "code": "Specimen",
+          "system": "fdpg.mii.cds",
+          "version": "1.0.0",
+          "display": "Bioprobe"
+        }
+      },
+      {
+        "termCodes": [
+          {
+            "code": "441479001",
+            "system": "http://snomed.info/sct",
+            "version": "http://snomed.info/sct/900000000000207008/version/20240501",
+            "display": "Fresh tissue specimen"
+          }
+        ],
+        "context": {
+          "code": "Specimen",
+          "system": "fdpg.mii.cds",
+          "version": "1.0.0",
+          "display": "Bioprobe"
+        }
+      },
+      {
+        "termCodes": [
+          {
+            "code": "258580003",
+            "system": "http://snomed.info/sct",
+            "version": "http://snomed.info/sct/900000000000207008/version/20240501",
+            "display": "Whole blood"
+          }
+        ],
+        "context": {
+          "code": "Specimen",
+          "system": "fdpg.mii.cds",
+          "version": "1.0.0",
+          "display": "Bioprobe"
+        }
+      },
+      {
+        "termCodes": [
+          {
+            "code": "119342007",
+            "system": "http://snomed.info/sct",
+            "version": "http://snomed.info/sct/900000000000207008/version/20240501",
+            "display": "Saliva Specimen"
+          }
+        ],
+        "context": {
+          "code": "Specimen",
+          "system": "fdpg.mii.cds",
+          "version": "1.0.0",
+          "display": "Bioprobe"
+        }
+      }
+    ]
+  ]
+}

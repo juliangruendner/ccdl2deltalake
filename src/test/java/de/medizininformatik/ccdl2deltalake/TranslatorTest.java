@@ -358,8 +358,95 @@ class TranslatorTest {
         var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
         var query = mapper.readValue(json, StructuredQuery.class);
         var sql = SqlWriter.write("test-new", translatorWithTree.toSql(query));
-
-
     }
-    
+
+    // ── feasibility-monitoring queries ──────────────────────────────────────
+
+    static MappingContext ctxWithExampleTree;
+    static Translator translatorWithExampleTree;
+
+    @org.junit.jupiter.api.BeforeAll
+    static void setupWithExampleTree() throws IOException {
+        try (var ms = TranslatorTest.class.getResourceAsStream("/test-mapping.json");
+             var td = TranslatorTest.class.getResourceAsStream("/test-table-descriptions.json");
+             var ts = java.io.FileInputStream.class
+                 .getConstructor(String.class)
+                 .newInstance("/Users/pi19vypi/code/example-mapping/tree.json")) {
+            ctxWithExampleTree = MappingContext.fromJson(ms, td, ts);
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
+        translatorWithExampleTree = Translator.of(ctxWithExampleTree);
+    }
+
+    private String translateMonitoring(String queryName) throws Exception {
+        var json = Files.readString(Path.of("src/test/resources/ccdl/monitoring/" + queryName + ".json"));
+        var query = new com.fasterxml.jackson.databind.ObjectMapper()
+            .readValue(json, StructuredQuery.class);
+        return SqlWriter.write("monitoring-" + queryName, translatorWithExampleTree.toSql(query));
+    }
+
+    @Test
+    void monitoring_patientGender() throws Exception {
+        var sql = translateMonitoring("patient-gender");
+        assertThat(sql).contains("FROM fhir.default.patient t");
+        assertThat(sql).contains("t.gender IN ('female', 'male')");
+    }
+
+    @Test
+    void monitoring_diabetesAny() throws Exception {
+        var sql = translateMonitoring("diabetes-any");
+        assertThat(sql).contains("FROM fhir.default.condition t");
+        assertThat(sql).contains("CROSS JOIN UNNEST(t.code.coding) AS tc");
+        // E10-E14 expands via tree — just verify it's a condition query
+        assertThat(sql).contains("tc.system = 'http://fhir.de/CodeSystem/bfarm/icd-10-gm'");
+    }
+
+    @Test
+    void monitoring_hemoglobin() throws Exception {
+        var sql = translateMonitoring("hemoglobin-718-7");
+        // 10 LOINC codes unioned
+        assertThat(sql).contains("FROM fhir.default.observation t");
+        assertThat(sql).contains("'718-7'");
+        assertThat(sql).contains("'59260-0'");
+        assertThat(sql).contains("'4548-4'");
+        assertThat(sql).contains("'94500-6'");
+        assertThat(sql).contains("UNION");
+    }
+
+    @Test
+    void monitoring_procedureEndocronologicalFunction() throws Exception {
+        var sql = translateMonitoring("procedure-endocronological-function");
+        assertThat(sql).contains("FROM fhir.default.procedure t");
+        assertThat(sql).contains("CROSS JOIN UNNEST(t.code.coding) AS tc");
+        assertThat(sql).contains("tc.system = 'http://fhir.de/CodeSystem/bfarm/ops'");
+    }
+
+    @Test
+    void monitoring_specimenTest() throws Exception {
+        var sql = translateMonitoring("specimen-test");
+        assertThat(sql).contains("FROM fhir.default.specimen t");
+        assertThat(sql).contains("CROSS JOIN UNNEST(t.type.coding) AS tc");
+        assertThat(sql).contains("'119297000'");
+        assertThat(sql).contains("'119361006'");
+        assertThat(sql).contains("UNION");
+    }
+
+    @Test
+    void monitoring_centralConsentEudsgvoNiveau() throws Exception {
+        var sql = translateMonitoring("central-consent-eudsgvoniveau");
+        assertThat(sql).contains("FROM fhir.default.consent t");
+        assertThat(sql).contains("CROSS JOIN UNNEST(t.provision.provision) AS _tc");
+    }
+
+    @Test
+    void monitoring_medicationAdministrationAntidiab() throws Exception {
+        var sql = translateMonitoring("medication-administration-antidiab");
+        // three contexts UNIONed
+        assertThat(sql).contains("fhir.default.medicationadministration");
+        assertThat(sql).contains("fhir.default.medicationstatement");
+        assertThat(sql).contains("fhir.default.medicationrequest");
+        assertThat(sql).contains("UNION");
+    }
+
 }

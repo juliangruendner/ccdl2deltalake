@@ -1,0 +1,24 @@
+{
+  "version": "http://to_be_decided.com/draft-1/schema#",
+  "display": "",
+  "inclusionCriteria": [
+    [
+      {
+        "termCodes": [
+          {
+            "code": "2.16.840.1.113883.3.1937.777.24.5.3.8",
+            "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+            "version": "1.0.2",
+            "display": "MDAT wissenschaftlich nutzen EU DSGVO NIVEAU"
+          }
+        ],
+        "context": {
+          "code": "Einwilligung",
+          "system": "fdpg.mii.cds",
+          "version": "1.0.0",
+          "display": "Einwilligung"
+        }
+      }
+    ]
+  ]
+}
