@@ -98,18 +98,37 @@ public class MappingContext {
     }
 
     /**
-     * Result of {@link #resolveTermCodePath}: the UNNEST FROM clauses to emit, the alias of the
-     * last generated row (or {@code startAlias} if no UNNESTs were needed), and any remaining
-     * struct-path suffix to access on that alias.
+     * Result of {@link #resolveTermCodePath}: structured array levels from which UNNEST clauses
+     * or an ANY_MATCH expression can be derived, plus the terminal alias and any remaining
+     * struct-path suffix.
      */
-    public record TermCodeResolution(List<String> unnestClauses, String terminalAlias,
-                                     String remainingPath) {}
+    public record TermCodeResolution(List<ArrayLevel> levels, String terminalAlias,
+                                     String remainingPath) {
+
+        public record ArrayLevel(String arrayExpr, String alias) {}
+
+        /** CROSS JOIN UNNEST clauses for callers that still need the join form (ref/attr filters). */
+        public List<String> unnestClauses() {
+            return levels.stream()
+                .map(l -> "CROSS JOIN UNNEST(" + l.arrayExpr() + ") AS " + l.alias() + "\n")
+                .toList();
+        }
+
+        /** Wraps {@code innerCondition} in nested ANY_MATCH calls, one per array level. */
+        public String toAnyMatch(String innerCondition) {
+            String result = innerCondition;
+            for (int i = levels.size() - 1; i >= 0; i--) {
+                var l = levels.get(i);
+                result = "ANY_MATCH(" + l.arrayExpr() + ", " + l.alias() + " -> " + result + ")";
+            }
+            return result;
+        }
+    }
 
     /**
-     * Walks {@code path} (dot-notation FHIRPath) left to right, generating a
-     * {@code CROSS JOIN UNNEST(...)} clause at each segment whose absolute prefix appears in the
-     * table description's {@code arrays} set.  Segments not in the set are accumulated as a struct
-     * navigation suffix used in WHERE.
+     * Walks {@code path} (dot-notation FHIRPath) left to right, recording an array level at each
+     * segment whose absolute prefix appears in the table description's {@code arrays} set.
+     * Segments not in the set are accumulated as a struct navigation suffix.
      *
      * <p>Intermediate aliases are {@code "_" + finalAlias + n} (e.g. {@code _tc0}, {@code _tc1})
      * and the very last alias is {@code finalAlias} (e.g. {@code tc}).
@@ -117,14 +136,14 @@ public class MappingContext {
      * @param tableName  the FHIR resource table to look up cardinality for
      * @param path       dot-notation FHIRPath (e.g. {@code "provision.provision.code.coding"})
      * @param startAlias SQL alias of the primary table row ({@code "t"} or {@code "j"} for joins)
-     * @param finalAlias desired alias for the last UNNEST result (e.g. {@code "tc"})
+     * @param finalAlias desired alias for the last array element (e.g. {@code "tc"})
      */
     public TermCodeResolution resolveTermCodePath(String tableName, String path,
                                                    String startAlias, String finalAlias) {
         var td = tableDescriptions.get(tableName);
         Set<String> arrays = (td != null) ? td.arrays() : Set.of();
 
-        var unnestClauses = new ArrayList<String>();
+        var levels = new ArrayList<TermCodeResolution.ArrayLevel>();
         String prevAlias = startAlias;
         String currentAbsPath = "";
         String currentRelPath = "";
@@ -136,15 +155,14 @@ public class MappingContext {
 
             if (arrays.contains(absPath)) {
                 boolean isLast = (i == parts.length - 1);
-                String alias = isLast ? finalAlias : ("_" + finalAlias + unnestClauses.size());
-                unnestClauses.add("CROSS JOIN UNNEST(" + prevAlias + "." + currentRelPath
-                    + ") AS " + alias + "\n");
+                String alias = isLast ? finalAlias : ("_" + finalAlias + levels.size());
+                levels.add(new TermCodeResolution.ArrayLevel(prevAlias + "." + currentRelPath, alias));
                 prevAlias = alias;
                 currentAbsPath = absPath;
                 currentRelPath = "";
             }
         }
 
-        return new TermCodeResolution(List.copyOf(unnestClauses), prevAlias, currentRelPath);
+        return new TermCodeResolution(List.copyOf(levels), prevAlias, currentRelPath);
     }
 }

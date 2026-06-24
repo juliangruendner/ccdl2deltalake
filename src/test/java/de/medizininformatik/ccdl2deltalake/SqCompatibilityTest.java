@@ -104,7 +104,7 @@ class SqCompatibilityTest {
 
         assertThat(sql).contains("FROM medicationadministration t");
         assertThat(sql).contains("JOIN medication j ON t.medicationreference.reference = j.id_versioned");
-        assertThat(sql).contains("CROSS JOIN UNNEST(j.code.coding) AS tc");
+        assertThat(sql).contains("ANY_MATCH(j.code.coding, tc ->");
         assertThat(sql).contains("tc.system = 'http://fhir.de/CodeSystem/bfarm/atc'");
         assertThat(sql).contains("tc.code IN ('B01AB01')");
         assertThat(sql).doesNotContain("INTERSECT");
@@ -188,7 +188,7 @@ class SqCompatibilityTest {
         var sql = translate(SQ + "PrimaryPathSQ.json");
 
         assertThat(sql).contains("FROM procedure t");
-        assertThat(sql).contains("CROSS JOIN UNNEST(t.code.coding) AS tc");
+        assertThat(sql).contains("ANY_MATCH(t.code.coding, tc ->");
         assertThat(sql).contains("tc.system = 'http://snomed.info/sct'");
         assertThat(sql).contains("tc.code IN ('726427004')");
         assertThat(sql).doesNotContain("JOIN medication");
@@ -340,14 +340,14 @@ class SqCompatibilityTest {
     // ── Consent / Einwilligung ────────────────────────────────────────────────
 
     @Test
-    void consent_chainedUnnest_generatesThreeLevelUnnestSql() throws Exception {
+    void consent_chainedArrayPath_generatesNestedAnyMatch() throws Exception {
         var sql = translate(SQ + "consent.json");
 
         assertThat(sql).contains("FROM consent t");
-        // Three UNNEST levels: provision.provision → code → coding
-        assertThat(sql).contains("CROSS JOIN UNNEST(t.provision.provision) AS _tc0");
-        assertThat(sql).contains("CROSS JOIN UNNEST(_tc0.code) AS _tc1");
-        assertThat(sql).contains("CROSS JOIN UNNEST(_tc1.coding) AS tc");
+        // Three-level array path provision.provision.code.coding → nested ANY_MATCH
+        assertThat(sql).contains("ANY_MATCH(t.provision.provision, _tc0 ->");
+        assertThat(sql).contains("ANY_MATCH(_tc0.code, _tc1 ->");
+        assertThat(sql).contains("ANY_MATCH(_tc1.coding, tc ->");
         assertThat(sql).contains("tc.system = 'urn:oid:2.16.840.1.113883.3.1937.777.24.5.3'");
         assertThat(sql).contains("tc.code IN ('2.16.840.1.113883.3.1937.777.24.5.3.8')");
         assertThat(sql).contains("SPLIT_PART(t.patient.reference, '/', 2) AS patient_id");

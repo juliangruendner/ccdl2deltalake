@@ -51,7 +51,7 @@ class TranslatorTest {
 
         assertThat(sql).contains("SELECT DISTINCT SPLIT_PART(t.subject.reference, '/', 2) AS patient_id");
         assertThat(sql).contains("FROM condition t");
-        assertThat(sql).contains("CROSS JOIN UNNEST(t.code.coding) AS tc");
+        assertThat(sql).contains("ANY_MATCH(t.code.coding, tc ->");
         assertThat(sql).contains("tc.system = 'http://snomed.info/sct'");
         assertThat(sql).contains("tc.code IN ('37796009')");
     }
@@ -235,7 +235,7 @@ class TranslatorTest {
         var sql = SqlWriter.write("ref_attr_filter_specimen_condition", translator.toSql(query));
 
         assertThat(sql).contains("FROM specimen t");
-        assertThat(sql).contains("CROSS JOIN UNNEST(t.type.coding) AS tc");
+        assertThat(sql).contains("ANY_MATCH(t.type.coding, tc ->");
         assertThat(sql).contains("CROSS JOIN UNNEST(t._extension)");
         assertThat(sql).contains("CROSS JOIN UNNEST(_earr0) AS ext0");
         assertThat(sql).contains("INNER JOIN condition ref0");
@@ -255,10 +255,10 @@ class TranslatorTest {
 
         assertThat(sql).contains("FROM medicationadministration t");
         assertThat(sql).contains("JOIN medication j ON t.medicationreference.reference = j.id_versioned");
-        assertThat(sql).contains("CROSS JOIN UNNEST(j.code.coding) AS tc");
+        assertThat(sql).contains("ANY_MATCH(j.code.coding, tc ->");
         assertThat(sql).contains("tc.system = 'http://fhir.de/CodeSystem/bfarm/atc'");
         assertThat(sql).contains("tc.code IN ('B01AB01')");
-        assertThat(sql).doesNotContain("UNNEST(t.");
+        assertThat(sql).doesNotContain("ANY_MATCH(t.");
     }
 
     @Test
@@ -270,7 +270,7 @@ class TranslatorTest {
         var sql = SqlWriter.write("qty_comparator_attr_filter", translator.toSql(query));
 
         assertThat(sql).contains("FROM specimen t");
-        assertThat(sql).contains("CROSS JOIN UNNEST(t.type.coding) AS tc");
+        assertThat(sql).contains("ANY_MATCH(t.type.coding, tc ->");
         assertThat(sql).contains("tc.code IN ('119364003')");
         assertThat(sql).contains("t.collection.quantity.value > 0.0");
         assertThat(sql).contains("t.collection.quantity.code = 'mL'");
@@ -315,7 +315,7 @@ class TranslatorTest {
         var sql = SqlWriter.write("codeable_concept_attr_filter", translator.toSql(query));
 
         assertThat(sql).contains("FROM specimen t");
-        assertThat(sql).contains("CROSS JOIN UNNEST(t.type.coding) AS tc");
+        assertThat(sql).contains("ANY_MATCH(t.type.coding, tc ->");
         assertThat(sql).contains("CROSS JOIN UNNEST(t.collection.bodysite.coding) AS attr_tc0");
         assertThat(sql).contains("attr_tc0.system = 'urn:oid:2.16.840.1.113883.6.43.1'");
         assertThat(sql).contains("attr_tc0.code IN ('C44.6')");
@@ -333,7 +333,7 @@ class TranslatorTest {
         var sql = SqlWriter.write("non_primary_search_path", translator.toSql(query));
 
         assertThat(sql).contains("FROM procedure t");
-        assertThat(sql).contains("CROSS JOIN UNNEST(t.category.coding) AS tc");
+        assertThat(sql).contains("ANY_MATCH(t.category.coding, tc ->");
         assertThat(sql).contains("tc.system = 'http://snomed.info/sct'");
         assertThat(sql).contains("tc.code IN ('387713003')");
     }
@@ -396,7 +396,7 @@ class TranslatorTest {
     void monitoring_diabetesAny() throws Exception {
         var sql = translateMonitoring("diabetes-any");
         assertThat(sql).contains("FROM condition t");
-        assertThat(sql).contains("CROSS JOIN UNNEST(t.code.coding) AS tc");
+        assertThat(sql).contains("ANY_MATCH(t.code.coding, tc ->");
         // E10-E14 expands via tree — just verify it's a condition query
         assertThat(sql).contains("tc.system = 'http://fhir.de/CodeSystem/bfarm/icd-10-gm'");
     }
@@ -439,7 +439,7 @@ class TranslatorTest {
     void monitoring_centralConsentEudsgvoNiveau() throws Exception {
         var sql = translateMonitoring("central-consent-eudsgvoniveau");
         assertThat(sql).contains("FROM consent t");
-        assertThat(sql).contains("CROSS JOIN UNNEST(t.provision.provision) AS _tc");
+        assertThat(sql).contains("ANY_MATCH(t.provision.provision, _tc0 ->");
     }
 
     @Test

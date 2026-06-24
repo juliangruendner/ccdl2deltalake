@@ -87,10 +87,6 @@ abstract class AbstractCriterion implements Criterion {
                   .append(" = j.").append(join.secondaryIdPath()).append("\n")
             );
 
-            for (var unnest : resolution.unnestClauses()) {
-                sb.append(unnest);
-            }
-
             for (var frag : refFragments) {
                 sb.append(frag.fromClause());
             }
@@ -102,8 +98,9 @@ abstract class AbstractCriterion implements Criterion {
             String termPfx = resolution.terminalAlias()
                 + (resolution.remainingPath().isEmpty() ? "" : "." + resolution.remainingPath());
 
-            sb.append("WHERE ").append(termPfx).append(".system = '").append(escape(system)).append("'\n");
-            sb.append("  AND ").append(termPfx).append(".code IN (").append(inClause).append(")");
+            String termCodeCond = termPfx + ".system = '" + escape(system) + "'"
+                + " AND " + termPfx + ".code IN (" + inClause + ")";
+            sb.append("WHERE ").append(resolution.toAnyMatch(termCodeCond));
 
             if (additionalWhere != null && !additionalWhere.isBlank()) {
                 sb.append("\n  AND ").append(additionalWhere);
