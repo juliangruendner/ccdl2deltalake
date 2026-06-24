@@ -7,7 +7,7 @@ import os
 import time
 
 import trino
-from trino.auth import OAuth2Authentication
+from trino.auth import OAuth2Authentication, ConsoleRedirectHandler
 
 
 def main():
@@ -35,7 +35,7 @@ def main():
         catalog=args.catalog,
         schema=args.schema,
         http_scheme="https" if use_https else "http",
-        auth=OAuth2Authentication() if args.oauth else None,
+        auth=OAuth2Authentication(redirect_auth_url_handler=ConsoleRedirectHandler()) if args.oauth else None,
     )
 
     name_width = max(len(os.path.splitext(os.path.basename(f))[0]) for f in sql_files)
