@@ -15,6 +15,8 @@ def main():
     parser.add_argument("--host", default="localhost", help="Trino host (default: localhost)")
     parser.add_argument("--port", type=int, default=8080, help="Trino port (default: 8080)")
     parser.add_argument("--user", default="trino", help="Trino user (default: trino)")
+    parser.add_argument("--catalog", default="fhir", help="Trino catalog (default: fhir)")
+    parser.add_argument("--schema", default="default", help="Trino schema (default: default)")
     args = parser.parse_args()
 
     sql_files = sorted(glob.glob(os.path.join(args.folder, "*.sql")))
@@ -26,6 +28,8 @@ def main():
         host=args.host,
         port=args.port,
         user=args.user,
+        catalog=args.catalog,
+        schema=args.schema,
     )
 
     name_width = max(len(os.path.splitext(os.path.basename(f))[0]) for f in sql_files)

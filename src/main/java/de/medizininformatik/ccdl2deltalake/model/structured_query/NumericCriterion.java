@@ -52,7 +52,7 @@ public final class NumericCriterion extends AbstractCriterion {
     }
 
     @Override
-    public String toSql(MappingContext ctx, String catalog) {
+    public String toSql(MappingContext ctx) {
         var subQueries = new ArrayList<String>();
 
         for (TermCode termCode : concept.termCodes()) {
@@ -73,7 +73,7 @@ public final class NumericCriterion extends AbstractCriterion {
             }
 
             var expanded = ctx.expandTermCode(ctc).toList();
-            subQueries.add(buildTermCodeSql(catalog, mapping, expanded, additionalWhere.toString(), ctx));
+            subQueries.add(buildTermCodeSql(mapping, expanded, additionalWhere.toString(), ctx));
         }
 
         if (subQueries.isEmpty()) {

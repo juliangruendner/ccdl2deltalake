@@ -68,7 +68,7 @@ class SqCompatibilityTest {
     void encounterInpatient_singleCodingPath_noUnnest() throws Exception {
         var sql = translate(SQ + "EncounterInpatient.json");
 
-        assertThat(sql).contains("FROM fhir.default.encounter t");
+        assertThat(sql).contains("FROM encounter t");
         // No UNNEST — class is a single Coding struct
         assertThat(sql).doesNotContain("CROSS JOIN UNNEST");
         assertThat(sql).contains("t.class.system = 'http://terminology.hl7.org/CodeSystem/v3-ActCode'");
@@ -87,9 +87,9 @@ class SqCompatibilityTest {
         var tr = de.medizininformatik.ccdl2deltalake.model.structured_query.TimeRestriction
             .create("2024-01-01", "2024-02-15");
         var criterion = de.medizininformatik.ccdl2deltalake.model.structured_query.ConceptCriterion.of(concept, tr);
-        var sql = SqlWriter.write("encounter_tr", criterion.toSql(ctx, "fhir.default"));
+        var sql = SqlWriter.write("encounter_tr", criterion.toSql(ctx));
 
-        assertThat(sql).contains("FROM fhir.default.encounter t");
+        assertThat(sql).contains("FROM encounter t");
         assertThat(sql).doesNotContain("CROSS JOIN UNNEST");
         assertThat(sql).contains("t.class.code IN ('IMP')");
         assertThat(sql).contains("DATE(FROM_ISO8601_TIMESTAMP(t.period.start)) >= DATE('2024-01-01')");
@@ -102,8 +102,8 @@ class SqCompatibilityTest {
     void medicationAdministrationSQ_generatesJoinSql() throws Exception {
         var sql = translate(SQ + "MedicationAdministrationSQ.json");
 
-        assertThat(sql).contains("FROM fhir.default.medicationadministration t");
-        assertThat(sql).contains("JOIN fhir.default.medication j ON t.medicationreference.reference = j.id_versioned");
+        assertThat(sql).contains("FROM medicationadministration t");
+        assertThat(sql).contains("JOIN medication j ON t.medicationreference.reference = j.id_versioned");
         assertThat(sql).contains("CROSS JOIN UNNEST(j.code.coding) AS tc");
         assertThat(sql).contains("tc.system = 'http://fhir.de/CodeSystem/bfarm/atc'");
         assertThat(sql).contains("tc.code IN ('B01AB01')");
@@ -145,8 +145,8 @@ class SqCompatibilityTest {
     void medicationRequestSQ_generatesJoinSql() throws Exception {
         var sql = translate(SQ + "MedicationRequestSQ.json");
 
-        assertThat(sql).contains("FROM fhir.default.medicationrequest t");
-        assertThat(sql).contains("JOIN fhir.default.medication j ON t.medicationreference.reference = j.id_versioned");
+        assertThat(sql).contains("FROM medicationrequest t");
+        assertThat(sql).contains("JOIN medication j ON t.medicationreference.reference = j.id_versioned");
         assertThat(sql).contains("tc.code IN ('B01AB01')");
         assertThat(sql).doesNotContain("DATE(");
     }
@@ -155,7 +155,7 @@ class SqCompatibilityTest {
     void medicationRequestSQTimeRestriction_addsDateFilter() throws Exception {
         var sql = translate(SQ + "MedicationRequestSQTimeRestriction.json");
 
-        assertThat(sql).contains("FROM fhir.default.medicationrequest t");
+        assertThat(sql).contains("FROM medicationrequest t");
         assertThat(sql).contains("DATE(FROM_ISO8601_TIMESTAMP(t.authoredon)) >= DATE('2024-01-01')");
         assertThat(sql).contains("DATE(FROM_ISO8601_TIMESTAMP(t.authoredon)) <= DATE('2024-02-01')");
     }
@@ -166,8 +166,8 @@ class SqCompatibilityTest {
     void medicationStatementSQ_generatesJoinSql() throws Exception {
         var sql = translate(SQ + "MedicationStatementSQ.json");
 
-        assertThat(sql).contains("FROM fhir.default.medicationstatement t");
-        assertThat(sql).contains("JOIN fhir.default.medication j ON t.medicationreference.reference = j.id_versioned");
+        assertThat(sql).contains("FROM medicationstatement t");
+        assertThat(sql).contains("JOIN medication j ON t.medicationreference.reference = j.id_versioned");
         assertThat(sql).contains("tc.code IN ('B01AB01')");
         assertThat(sql).doesNotContain("DATE(");
     }
@@ -176,7 +176,7 @@ class SqCompatibilityTest {
     void medicationStatementSQTimeRestriction_addsDateFilter() throws Exception {
         var sql = translate(SQ + "MedicationStatementSQTimeRestriction.json");
 
-        assertThat(sql).contains("FROM fhir.default.medicationstatement t");
+        assertThat(sql).contains("FROM medicationstatement t");
         assertThat(sql).contains("DATE(FROM_ISO8601_TIMESTAMP(t.effectivedatetime)) >= DATE('2024-01-01')");
         assertThat(sql).contains("DATE(FROM_ISO8601_TIMESTAMP(t.effectivedatetime)) <= DATE('2024-02-01')");
     }
@@ -187,18 +187,18 @@ class SqCompatibilityTest {
     void primaryPathSQ_snomed_generatesCorrectSql() throws Exception {
         var sql = translate(SQ + "PrimaryPathSQ.json");
 
-        assertThat(sql).contains("FROM fhir.default.procedure t");
+        assertThat(sql).contains("FROM procedure t");
         assertThat(sql).contains("CROSS JOIN UNNEST(t.code.coding) AS tc");
         assertThat(sql).contains("tc.system = 'http://snomed.info/sct'");
         assertThat(sql).contains("tc.code IN ('726427004')");
-        assertThat(sql).doesNotContain("JOIN fhir.default.medication");
+        assertThat(sql).doesNotContain("JOIN medication");
     }
 
     @Test
     void procedure_ops_generatesCorrectSql() throws Exception {
         var sql = translate(SQ_ROP + "Procedure.json");
 
-        assertThat(sql).contains("FROM fhir.default.procedure t");
+        assertThat(sql).contains("FROM procedure t");
         assertThat(sql).contains("tc.system = 'http://fhir.de/CodeSystem/bfarm/ops'");
         assertThat(sql).contains("tc.code IN ('5-403.05')");
     }
@@ -207,7 +207,7 @@ class SqCompatibilityTest {
     void largeQueryWorstCase_twoInclusionGroupsWithExclusion() throws Exception {
         var sql = translate(SQ + "large-query-worst-case-with-time-constraints.json");
 
-        assertThat(sql).contains("FROM fhir.default.procedure t");
+        assertThat(sql).contains("FROM procedure t");
         assertThat(sql).contains("INTERSECT");
         assertThat(sql).contains("EXCEPT");
         assertThat(sql).contains("tc.code IN ('8-810')");
@@ -221,7 +221,7 @@ class SqCompatibilityTest {
     void largeQueryMoreCritTimeRest_fiveInclusionGroupsWithExclusions() throws Exception {
         var sql = translate(SQ + "test-large-query-more-crit-time-rest-1.json");
 
-        assertThat(sql).contains("FROM fhir.default.procedure t");
+        assertThat(sql).contains("FROM procedure t");
         assertThat(sql).contains("INTERSECT");
         assertThat(sql).contains("EXCEPT");
         assertThat(sql).contains("tc.code IN ('8-810')");
@@ -240,9 +240,9 @@ class SqCompatibilityTest {
     void specimenSQ_referenceAttributeFilter_generatesExtensionJoin() throws Exception {
         var sql = translate(SQ + "SpecimenSQ.json");
 
-        assertThat(sql).contains("FROM fhir.default.specimen t");
+        assertThat(sql).contains("FROM specimen t");
         assertThat(sql).contains("CROSS JOIN UNNEST(t._extension)");
-        assertThat(sql).contains("INNER JOIN fhir.default.condition ref0");
+        assertThat(sql).contains("INNER JOIN condition ref0");
         assertThat(sql).contains("tc.code IN ('119364003')");
         assertThat(sql).contains("ref_tc0.code IN ('E13.9')");
     }
@@ -251,8 +251,8 @@ class SqCompatibilityTest {
     void specimenSQTwoReferenceCriteria_bothCodesInOneInClause() throws Exception {
         var sql = translate(SQ + "SpecimenSQTwoReferenceCriteria.json");
 
-        assertThat(sql).contains("FROM fhir.default.specimen t");
-        assertThat(sql).contains("INNER JOIN fhir.default.condition ref0");
+        assertThat(sql).contains("FROM specimen t");
+        assertThat(sql).contains("INNER JOIN condition ref0");
         // E13.9 and E13.1 from two inner criteria → merged into one IN clause (OR semantics)
         assertThat(sql).contains("ref_tc0.code IN (");
         assertThat(sql).contains("'E13.9'");
@@ -263,7 +263,7 @@ class SqCompatibilityTest {
     void specimenROP_differentSnomedCode_generatesCorrectSql() throws Exception {
         var sql = translate(SQ_ROP + "Specimen.json");
 
-        assertThat(sql).contains("FROM fhir.default.specimen t");
+        assertThat(sql).contains("FROM specimen t");
         assertThat(sql).contains("tc.code IN ('396997002')");
     }
 
@@ -273,14 +273,14 @@ class SqCompatibilityTest {
 
         // Inclusion: patient gender (no SPLIT_PART, direct t.id)
         assertThat(sql).contains("t.id AS patient_id");
-        assertThat(sql).contains("FROM fhir.default.patient t");
+        assertThat(sql).contains("FROM patient t");
         assertThat(sql).contains("t.gender IN ('female')");
         // Structure: inclusion EXCEPT exclusion
         assertThat(sql).contains("EXCEPT");
         // Exclusion: specimen with festgestellteDiagnose
-        assertThat(sql).contains("FROM fhir.default.specimen t");
+        assertThat(sql).contains("FROM specimen t");
         assertThat(sql).contains("tc.code IN ('119364003')");
-        assertThat(sql).contains("INNER JOIN fhir.default.condition ref0");
+        assertThat(sql).contains("INNER JOIN condition ref0");
         assertThat(sql).contains("ref_tc0.code IN ('E13.9')");
     }
 
@@ -290,10 +290,10 @@ class SqCompatibilityTest {
 
         // Inclusion group 1: patient gender
         assertThat(sql).contains("t.id AS patient_id");
-        assertThat(sql).contains("FROM fhir.default.patient t");
+        assertThat(sql).contains("FROM patient t");
         assertThat(sql).contains("t.gender IN ('female')");
         // Inclusion group 2: specimen with festgestellteDiagnose
-        assertThat(sql).contains("FROM fhir.default.specimen t");
+        assertThat(sql).contains("FROM specimen t");
         assertThat(sql).contains("tc.code IN ('119364003')");
         assertThat(sql).contains("ref_tc0.code IN ('E13.9')");
         // Structure: INTERSECT between the two groups
@@ -313,10 +313,10 @@ class SqCompatibilityTest {
     void patientAge_comparatorEq_generatesDateDiffSql() throws Exception {
         var concept = ContextualConcept.of(PATIENT_CTX, List.of(AGE_TC));
         var criterion = NumericCriterion.of(concept, Comparator.EQUAL, new BigDecimal("20"), "a", null);
-        var sql = SqlWriter.write("patient_age_eq20", criterion.toSql(ctx, "fhir.default"));
+        var sql = SqlWriter.write("patient_age_eq20", criterion.toSql(ctx));
 
         assertThat(sql).contains("t.id AS patient_id");
-        assertThat(sql).contains("FROM fhir.default.patient t");
+        assertThat(sql).contains("FROM patient t");
         assertThat(sql).contains("DATE_DIFF('year', DATE(CASE WHEN LENGTH(t.birthdate) = 4 THEN CONCAT(t.birthdate, '-01-01') WHEN LENGTH(t.birthdate) = 7 THEN CONCAT(t.birthdate, '-01') ELSE t.birthdate END), CURRENT_DATE) = 20");
         // Unit 'a' has no column to compare against — must not appear as a WHERE condition
         assertThat(sql).doesNotContain("= 'a'");
@@ -328,10 +328,10 @@ class SqCompatibilityTest {
     void patientAge_rangeGt18Lt65_generatesDateDiffBetweenSql() throws Exception {
         var concept = ContextualConcept.of(PATIENT_CTX, List.of(AGE_TC));
         var criterion = RangeCriterion.of(concept, new BigDecimal("18"), new BigDecimal("65"), "a", null);
-        var sql = SqlWriter.write("patient_age_range", criterion.toSql(ctx, "fhir.default"));
+        var sql = SqlWriter.write("patient_age_range", criterion.toSql(ctx));
 
         assertThat(sql).contains("t.id AS patient_id");
-        assertThat(sql).contains("FROM fhir.default.patient t");
+        assertThat(sql).contains("FROM patient t");
         assertThat(sql).contains("DATE_DIFF('year', DATE(CASE WHEN LENGTH(t.birthdate) = 4 THEN CONCAT(t.birthdate, '-01-01') WHEN LENGTH(t.birthdate) = 7 THEN CONCAT(t.birthdate, '-01') ELSE t.birthdate END), CURRENT_DATE) BETWEEN 18 AND 65");
         assertThat(sql).doesNotContain("= 'a'");
         assertThat(sql).doesNotContain("SPLIT_PART");
@@ -343,7 +343,7 @@ class SqCompatibilityTest {
     void consent_chainedUnnest_generatesThreeLevelUnnestSql() throws Exception {
         var sql = translate(SQ + "consent.json");
 
-        assertThat(sql).contains("FROM fhir.default.consent t");
+        assertThat(sql).contains("FROM consent t");
         // Three UNNEST levels: provision.provision → code → coding
         assertThat(sql).contains("CROSS JOIN UNNEST(t.provision.provision) AS _tc0");
         assertThat(sql).contains("CROSS JOIN UNNEST(_tc0.code) AS _tc1");
@@ -359,7 +359,7 @@ class SqCompatibilityTest {
     void diagnoseROP_icd_generatesConditionSql() throws Exception {
         var sql = translate(SQ_ROP + "Diagnose.json");
 
-        assertThat(sql).contains("FROM fhir.default.condition t");
+        assertThat(sql).contains("FROM condition t");
         assertThat(sql).contains("tc.system = 'http://fhir.de/CodeSystem/bfarm/icd-10-gm'");
         assertThat(sql).contains("tc.code IN ('I08.0')");
     }
@@ -378,7 +378,7 @@ class SqCompatibilityTest {
         var sql = translate(SQ_ROP + "Todesursache.json");
 
         // Todesursache uses Diagnose context → maps to condition table
-        assertThat(sql).contains("FROM fhir.default.condition t");
+        assertThat(sql).contains("FROM condition t");
         assertThat(sql).contains("tc.code IN ('S14.11')");
     }
 
@@ -388,7 +388,7 @@ class SqCompatibilityTest {
     void observationLabROP_generatesObservationSql() throws Exception {
         var sql = translate(SQ_ROP + "ObservationLab.json");
 
-        assertThat(sql).contains("FROM fhir.default.observation t");
+        assertThat(sql).contains("FROM observation t");
         assertThat(sql).contains("tc.system = 'http://loinc.org'");
         assertThat(sql).contains("tc.code IN ('800-3')");
     }
@@ -408,8 +408,8 @@ class SqCompatibilityTest {
     void medicationAdminROP_p01ca_generatesJoinSql() throws Exception {
         var sql = translate(SQ_ROP + "MedicationAdministration.json");
 
-        assertThat(sql).contains("FROM fhir.default.medicationadministration t");
-        assertThat(sql).contains("JOIN fhir.default.medication j");
+        assertThat(sql).contains("FROM medicationadministration t");
+        assertThat(sql).contains("JOIN medication j");
         assertThat(sql).contains("tc.code IN ('P01CA')");
     }
 
@@ -417,8 +417,8 @@ class SqCompatibilityTest {
     void medicationRequestROP_p01ca_generatesJoinSql() throws Exception {
         var sql = translate(SQ_ROP + "MedicationRequest.json");
 
-        assertThat(sql).contains("FROM fhir.default.medicationrequest t");
-        assertThat(sql).contains("JOIN fhir.default.medication j");
+        assertThat(sql).contains("FROM medicationrequest t");
+        assertThat(sql).contains("JOIN medication j");
         assertThat(sql).contains("tc.code IN ('P01CA')");
     }
 
@@ -426,8 +426,8 @@ class SqCompatibilityTest {
     void medicationStatementROP_p01ca_generatesJoinSql() throws Exception {
         var sql = translate(SQ_ROP + "MedicationStatement.json");
 
-        assertThat(sql).contains("FROM fhir.default.medicationstatement t");
-        assertThat(sql).contains("JOIN fhir.default.medication j");
+        assertThat(sql).contains("FROM medicationstatement t");
+        assertThat(sql).contains("JOIN medication j");
         assertThat(sql).contains("tc.code IN ('P01CA')");
     }
 }

@@ -80,7 +80,7 @@ class TrinoIT {
         var deadline = System.currentTimeMillis() + Duration.ofMinutes(15).toMillis();
         while (System.currentTimeMillis() < deadline) {
             try (var stmt = connection.createStatement();
-                 var rs = stmt.executeQuery("SELECT 1 FROM fhir.default." + tableName + " LIMIT 1")) {
+                 var rs = stmt.executeQuery("SELECT 1 FROM " + tableName + " LIMIT 1")) {
                 System.out.println("Table " + tableName + " is ready.");
                 printSchema(tableName);
                 return;
@@ -94,7 +94,7 @@ class TrinoIT {
 
     private static void printSchema(String tableName) {
         try (var stmt = connection.createStatement();
-             var rs = stmt.executeQuery("SHOW COLUMNS FROM fhir.default." + tableName)) {
+             var rs = stmt.executeQuery("SHOW COLUMNS FROM " + tableName)) {
             System.out.println("=== SCHEMA: " + tableName + " ===");
             while (rs.next()) {
                 System.out.println("  " + rs.getString("Column") + " : " + rs.getString("Type"));

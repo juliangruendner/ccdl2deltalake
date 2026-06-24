@@ -21,21 +21,13 @@ import static java.util.Objects.requireNonNull;
 public class Translator {
 
     private final MappingContext mappingContext;
-    private final String catalog;
 
-    private Translator(MappingContext mappingContext, String catalog) {
+    private Translator(MappingContext mappingContext) {
         this.mappingContext = requireNonNull(mappingContext);
-        this.catalog = requireNonNull(catalog);
     }
 
-    /** Creates a translator using the default catalog {@code fhir.default}. */
     public static Translator of(MappingContext mappingContext) {
-        return new Translator(mappingContext, "fhir.default");
-    }
-
-    /** Creates a translator with a custom catalog+schema prefix, e.g. {@code "fhir.default"}. */
-    public static Translator of(MappingContext mappingContext, String catalog) {
-        return new Translator(mappingContext, catalog);
+        return new Translator(mappingContext);
     }
 
     public String toSql(StructuredQuery query) {
@@ -87,7 +79,7 @@ public class Translator {
 
     private String unionGroup(List<Criterion> criteria) {
         var sqls = criteria.stream()
-            .map(c -> c.toSql(mappingContext, catalog))
+            .map(c -> c.toSql(mappingContext))
             .toList();
         if (sqls.size() == 1) return sqls.get(0);
         return sqls.stream()
@@ -97,7 +89,7 @@ public class Translator {
 
     private String intersectGroup(List<Criterion> criteria) {
         var sqls = criteria.stream()
-            .map(c -> c.toSql(mappingContext, catalog))
+            .map(c -> c.toSql(mappingContext))
             .toList();
         if (sqls.size() == 1) return sqls.get(0);
         return sqls.stream()

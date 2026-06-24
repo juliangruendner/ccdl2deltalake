@@ -74,11 +74,9 @@ public interface Criterion {
 
     /**
      * Translates this criterion into a SQL SELECT returning distinct patient_id values.
-     *
-     * @param mappingContext holds the table/column mappings and ontology tree
-     * @param catalog        fully-qualified catalog+schema prefix, e.g. {@code "fhir.default"}
+     * Table names are unqualified — catalog and schema must be set on the connection.
      */
-    String toSql(MappingContext mappingContext, String catalog);
+    String toSql(MappingContext mappingContext);
 
     ContextualConcept getConcept();
 

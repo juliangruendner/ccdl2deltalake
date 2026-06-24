@@ -47,10 +47,10 @@ class TranslatorTest {
     @Test
     void conceptCriterion_generatesCorrectSql() {
         var criterion = ConceptCriterion.of(ContextualConcept.of(DIAGNOSE_CTX, List.of(MIGRAINE)));
-        var sql = SqlWriter.write("concept_criterion", criterion.toSql(ctx, "fhir.default"));
+        var sql = SqlWriter.write("concept_criterion", criterion.toSql(ctx));
 
         assertThat(sql).contains("SELECT DISTINCT SPLIT_PART(t.subject.reference, '/', 2) AS patient_id");
-        assertThat(sql).contains("FROM fhir.default.condition t");
+        assertThat(sql).contains("FROM condition t");
         assertThat(sql).contains("CROSS JOIN UNNEST(t.code.coding) AS tc");
         assertThat(sql).contains("tc.system = 'http://snomed.info/sct'");
         assertThat(sql).contains("tc.code IN ('37796009')");
@@ -61,9 +61,9 @@ class TranslatorTest {
         var criterion = NumericCriterion.of(
             ContextualConcept.of(LAB_CTX, List.of(LEUKOCYTES)),
             Comparator.GREATER_THAN, new BigDecimal("10.0"), "/nL", null);
-        var sql = SqlWriter.write("numeric_criterion", criterion.toSql(ctx, "fhir.default"));
+        var sql = SqlWriter.write("numeric_criterion", criterion.toSql(ctx));
 
-        assertThat(sql).contains("FROM fhir.default.observation t");
+        assertThat(sql).contains("FROM observation t");
         assertThat(sql).contains("tc.code IN ('26464-8')");
         assertThat(sql).contains("t.valuequantity.value > 10.0");
         assertThat(sql).contains("t.valuequantity.code = '/nL'");
@@ -74,7 +74,7 @@ class TranslatorTest {
         var criterion = RangeCriterion.of(
             ContextualConcept.of(LAB_CTX, List.of(HEMOGLOBIN)),
             new BigDecimal("10.0"), new BigDecimal("14.0"), "g/dL", null);
-        var sql = SqlWriter.write("range_criterion", criterion.toSql(ctx, "fhir.default"));
+        var sql = SqlWriter.write("range_criterion", criterion.toSql(ctx));
 
         assertThat(sql).contains("t.valuequantity.value BETWEEN 10.0 AND 14.0");
         assertThat(sql).contains("t.valuequantity.code = 'g/dL'");
@@ -142,7 +142,7 @@ class TranslatorTest {
         var tr = TimeRestriction.create("2024-01-01", "2024-12-31");
         var criterion = ConceptCriterion.of(
             ContextualConcept.of(DIAGNOSE_CTX, List.of(MIGRAINE)), tr);
-        var sql = SqlWriter.write("time_restriction", criterion.toSql(ctx, "fhir.default"));
+        var sql = SqlWriter.write("time_restriction", criterion.toSql(ctx));
 
         assertThat(sql).contains("DATE(t.recordeddate) >= DATE('2024-01-01')");
         assertThat(sql).contains("DATE(t.recordeddate) <= DATE('2024-12-31')");
@@ -232,11 +232,11 @@ class TranslatorTest {
         var query = mapper.readValue(json, StructuredQuery.class);
         var sql = SqlWriter.write("ref_attr_filter_specimen_condition", translator.toSql(query));
 
-        assertThat(sql).contains("FROM fhir.default.specimen t");
+        assertThat(sql).contains("FROM specimen t");
         assertThat(sql).contains("CROSS JOIN UNNEST(t.type.coding) AS tc");
         assertThat(sql).contains("CROSS JOIN UNNEST(t._extension)");
         assertThat(sql).contains("CROSS JOIN UNNEST(_earr0) AS ext0");
-        assertThat(sql).contains("INNER JOIN fhir.default.condition ref0");
+        assertThat(sql).contains("INNER JOIN condition ref0");
         assertThat(sql).contains("ref0.id = SPLIT_PART(ext0.valuereference.reference, '/', 2)");
         assertThat(sql).contains("CROSS JOIN UNNEST(ref0.code.coding) AS ref_tc0");
         assertThat(sql).contains("tc.system = 'http://snomed.info/sct'");
@@ -249,10 +249,10 @@ class TranslatorTest {
     @Test
     void joinedTermCode_medicationAdministration_generatesJoinSql() {
         var criterion = ConceptCriterion.of(ContextualConcept.of(MED_CTX, List.of(HEPARIN)));
-        var sql = SqlWriter.write("joined_termcode_medication", criterion.toSql(ctx, "fhir.default"));
+        var sql = SqlWriter.write("joined_termcode_medication", criterion.toSql(ctx));
 
-        assertThat(sql).contains("FROM fhir.default.medicationadministration t");
-        assertThat(sql).contains("JOIN fhir.default.medication j ON t.medicationreference.reference = j.id_versioned");
+        assertThat(sql).contains("FROM medicationadministration t");
+        assertThat(sql).contains("JOIN medication j ON t.medicationreference.reference = j.id_versioned");
         assertThat(sql).contains("CROSS JOIN UNNEST(j.code.coding) AS tc");
         assertThat(sql).contains("tc.system = 'http://fhir.de/CodeSystem/bfarm/atc'");
         assertThat(sql).contains("tc.code IN ('B01AB01')");
@@ -267,7 +267,7 @@ class TranslatorTest {
         var query = mapper.readValue(json, StructuredQuery.class);
         var sql = SqlWriter.write("qty_comparator_attr_filter", translator.toSql(query));
 
-        assertThat(sql).contains("FROM fhir.default.specimen t");
+        assertThat(sql).contains("FROM specimen t");
         assertThat(sql).contains("CROSS JOIN UNNEST(t.type.coding) AS tc");
         assertThat(sql).contains("tc.code IN ('119364003')");
         assertThat(sql).contains("t.collection.quantity.value > 0.0");
@@ -283,7 +283,7 @@ class TranslatorTest {
         var query = mapper.readValue(json, StructuredQuery.class);
         var sql = SqlWriter.write("qty_range_attr_filter", translator.toSql(query));
 
-        assertThat(sql).contains("FROM fhir.default.specimen t");
+        assertThat(sql).contains("FROM specimen t");
         assertThat(sql).contains("tc.code IN ('119364003')");
         assertThat(sql).contains("t.collection.quantity.value BETWEEN 0.0 AND 1000.0");
         assertThat(sql).contains("t.collection.quantity.code = 'mL'");
@@ -298,7 +298,7 @@ class TranslatorTest {
         var query = mapper.readValue(json, StructuredQuery.class);
         var sql = SqlWriter.write("concept_attr_filter", translator.toSql(query));
 
-        assertThat(sql).contains("FROM fhir.default.specimen t");
+        assertThat(sql).contains("FROM specimen t");
         assertThat(sql).contains("tc.code IN ('119364003')");
         assertThat(sql).contains("t.status IN ('available')");
         assertThat(sql).doesNotContain("INNER JOIN");
@@ -312,13 +312,13 @@ class TranslatorTest {
         var query = mapper.readValue(json, StructuredQuery.class);
         var sql = SqlWriter.write("codeable_concept_attr_filter", translator.toSql(query));
 
-        assertThat(sql).contains("FROM fhir.default.specimen t");
+        assertThat(sql).contains("FROM specimen t");
         assertThat(sql).contains("CROSS JOIN UNNEST(t.type.coding) AS tc");
         assertThat(sql).contains("CROSS JOIN UNNEST(t.collection.bodysite.coding) AS attr_tc0");
         assertThat(sql).contains("attr_tc0.system = 'urn:oid:2.16.840.1.113883.6.43.1'");
         assertThat(sql).contains("attr_tc0.code IN ('C44.6')");
         // reference filter also present
-        assertThat(sql).contains("INNER JOIN fhir.default.condition ref0");
+        assertThat(sql).contains("INNER JOIN condition ref0");
         assertThat(sql).contains("ref_tc0.code IN ('E13.9')");
     }
 
@@ -330,7 +330,7 @@ class TranslatorTest {
         var query = mapper.readValue(json, StructuredQuery.class);
         var sql = SqlWriter.write("non_primary_search_path", translator.toSql(query));
 
-        assertThat(sql).contains("FROM fhir.default.procedure t");
+        assertThat(sql).contains("FROM procedure t");
         assertThat(sql).contains("CROSS JOIN UNNEST(t.category.coding) AS tc");
         assertThat(sql).contains("tc.system = 'http://snomed.info/sct'");
         assertThat(sql).contains("tc.code IN ('387713003')");
@@ -386,14 +386,14 @@ class TranslatorTest {
     @Test
     void monitoring_patientGender() throws Exception {
         var sql = translateMonitoring("patient-gender");
-        assertThat(sql).contains("FROM fhir.default.patient t");
+        assertThat(sql).contains("FROM patient t");
         assertThat(sql).contains("t.gender IN ('female', 'male')");
     }
 
     @Test
     void monitoring_diabetesAny() throws Exception {
         var sql = translateMonitoring("diabetes-any");
-        assertThat(sql).contains("FROM fhir.default.condition t");
+        assertThat(sql).contains("FROM condition t");
         assertThat(sql).contains("CROSS JOIN UNNEST(t.code.coding) AS tc");
         // E10-E14 expands via tree — just verify it's a condition query
         assertThat(sql).contains("tc.system = 'http://fhir.de/CodeSystem/bfarm/icd-10-gm'");
@@ -403,7 +403,7 @@ class TranslatorTest {
     void monitoring_hemoglobin() throws Exception {
         var sql = translateMonitoring("hemoglobin-718-7");
         // 10 LOINC codes unioned
-        assertThat(sql).contains("FROM fhir.default.observation t");
+        assertThat(sql).contains("FROM observation t");
         assertThat(sql).contains("'718-7'");
         assertThat(sql).contains("'59260-0'");
         assertThat(sql).contains("'4548-4'");
@@ -414,7 +414,7 @@ class TranslatorTest {
     @Test
     void monitoring_procedureEndocronologicalFunction() throws Exception {
         var sql = translateMonitoring("procedure-endocronological-function");
-        assertThat(sql).contains("FROM fhir.default.procedure t");
+        assertThat(sql).contains("FROM procedure t");
         assertThat(sql).contains("tc.system = 'http://fhir.de/CodeSystem/bfarm/ops'");
         // OPS 3-20 and 8-19 must expand to child codes via tree
         assertThat(sql).contains("'3-200'");
@@ -424,7 +424,7 @@ class TranslatorTest {
     @Test
     void monitoring_specimenTest() throws Exception {
         var sql = translateMonitoring("specimen-test");
-        assertThat(sql).contains("FROM fhir.default.specimen t");
+        assertThat(sql).contains("FROM specimen t");
         assertThat(sql).contains("'119297000'");
         assertThat(sql).contains("'119361006'");
         assertThat(sql).contains("UNION");
@@ -433,16 +433,16 @@ class TranslatorTest {
     @Test
     void monitoring_centralConsentEudsgvoNiveau() throws Exception {
         var sql = translateMonitoring("central-consent-eudsgvoniveau");
-        assertThat(sql).contains("FROM fhir.default.consent t");
+        assertThat(sql).contains("FROM consent t");
         assertThat(sql).contains("CROSS JOIN UNNEST(t.provision.provision) AS _tc");
     }
 
     @Test
     void monitoring_medicationAdministrationAntidiab() throws Exception {
         var sql = translateMonitoring("medication-administration-antidiab");
-        assertThat(sql).contains("fhir.default.medicationadministration");
-        assertThat(sql).contains("fhir.default.medicationstatement");
-        assertThat(sql).contains("fhir.default.medicationrequest");
+        assertThat(sql).contains("medicationadministration");
+        assertThat(sql).contains("medicationstatement");
+        assertThat(sql).contains("medicationrequest");
         // ATC A10 must expand to child codes via tree
         assertThat(sql).contains("'A10A'");
         assertThat(sql).contains("'A10B'");

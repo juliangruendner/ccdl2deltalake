@@ -48,15 +48,15 @@ abstract class AbstractCriterion implements Criterion {
      * Builds a SQL SELECT returning distinct patient_id values for the given codes,
      * including any reference attribute filter JOINs.
      */
-    protected String buildTermCodeSql(String catalog, Mapping mapping, List<TermCode> codes,
+    protected String buildTermCodeSql(Mapping mapping, List<TermCode> codes,
                                        String additionalWhere, MappingContext ctx) {
-        var refFragments = buildRefFilterFragments(catalog, mapping, ctx);
+        var refFragments = buildRefFilterFragments(mapping, ctx);
         var simpleAttrConditions = buildSimpleAttributeWhereConditions(mapping);
         var codingAttrFragments = buildCodingAttributeFragments(mapping, ctx);
 
         // Patient-like resources: no term-code array — just apply other conditions
         if (mapping.getTermCodeFilter().isEmpty()) {
-            return buildNoTermCodeSql(catalog, mapping, additionalWhere, simpleAttrConditions,
+            return buildNoTermCodeSql(mapping, additionalWhere, simpleAttrConditions,
                 refFragments, codingAttrFragments);
         }
 
@@ -79,10 +79,10 @@ abstract class AbstractCriterion implements Criterion {
 
             var sb = new StringBuilder();
             sb.append("SELECT DISTINCT ").append(patientIdExpr(mapping)).append(" AS patient_id\n");
-            sb.append("FROM ").append(catalog).append(".").append(mapping.tableName()).append(" t\n");
+            sb.append("FROM ").append(mapping.tableName()).append(" t\n");
 
             tcf.getJoin().ifPresent(join ->
-                sb.append("JOIN ").append(catalog).append(".").append(join.table())
+                sb.append("JOIN ").append(join.table())
                   .append(" j ON t.").append(join.primaryRefPath())
                   .append(" = j.").append(join.secondaryIdPath()).append("\n")
             );
@@ -141,13 +141,13 @@ abstract class AbstractCriterion implements Criterion {
      * Generates a SELECT with no term-code UNNEST/filter — used for Patient-type resources
      * where the concept term code is a semantic label, not a data column filter.
      */
-    private String buildNoTermCodeSql(String catalog, Mapping mapping, String additionalWhere,
+    private String buildNoTermCodeSql(Mapping mapping, String additionalWhere,
                                        List<String> simpleAttrConditions,
                                        List<RefFilterFragment> refFragments,
                                        List<CodingAttrFragment> codingAttrFragments) {
         var sb = new StringBuilder();
         sb.append("SELECT DISTINCT ").append(patientIdExpr(mapping)).append(" AS patient_id\n");
-        sb.append("FROM ").append(catalog).append(".").append(mapping.tableName()).append(" t\n");
+        sb.append("FROM ").append(mapping.tableName()).append(" t\n");
 
         for (var frag : refFragments) sb.append(frag.fromClause());
         for (var frag : codingAttrFragments) sb.append(frag.fromClause());
@@ -187,8 +187,7 @@ abstract class AbstractCriterion implements Criterion {
 
     private record RefFilterFragment(String fromClause, String whereCondition) {}
 
-    private List<RefFilterFragment> buildRefFilterFragments(String catalog, Mapping mapping,
-                                                             MappingContext ctx) {
+    private List<RefFilterFragment> buildRefFilterFragments(Mapping mapping, MappingContext ctx) {
         var fragments = new ArrayList<RefFilterFragment>();
 
         int i = 0;
@@ -237,13 +236,13 @@ abstract class AbstractCriterion implements Criterion {
                       .append(") AS ").append(mapAlias)
                       .append("(_ek").append(i).append(", ").append(arrAlias).append(")\n");
                 fromSb.append("CROSS JOIN UNNEST(").append(arrAlias).append(") AS ").append(extAlias).append("\n");
-                fromSb.append("INNER JOIN ").append(catalog).append(".").append(innerMapping.tableName())
+                fromSb.append("INNER JOIN ").append(innerMapping.tableName())
                       .append(" ").append(refAlias)
                       .append(" ON ").append(refAlias).append(".id = SPLIT_PART(")
                       .append(extAlias).append(".").append(rafConfig.referenceValuePath())
                       .append(", '/', 2)\n");
             } else {
-                fromSb.append("INNER JOIN ").append(catalog).append(".").append(finalInnerMapping.tableName())
+                fromSb.append("INNER JOIN ").append(finalInnerMapping.tableName())
                       .append(" ").append(refAlias)
                       .append(" ON ").append(refAlias).append(".id = SPLIT_PART(t.")
                       .append(rafConfig.referenceValuePath())

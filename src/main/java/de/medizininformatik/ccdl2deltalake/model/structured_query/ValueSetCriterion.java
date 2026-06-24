@@ -34,7 +34,7 @@ public final class ValueSetCriterion extends AbstractCriterion {
     }
 
     @Override
-    public String toSql(MappingContext ctx, String catalog) {
+    public String toSql(MappingContext ctx) {
         var subQueries = new ArrayList<String>();
 
         for (TermCode termCode : concept.termCodes()) {
@@ -56,7 +56,7 @@ public final class ValueSetCriterion extends AbstractCriterion {
             }).collect(Collectors.joining("\n  OR "));
 
             var expanded = ctx.expandTermCode(ctc).toList();
-            subQueries.add(buildTermCodeSql(catalog, mapping, expanded, valueConditions, ctx));
+            subQueries.add(buildTermCodeSql(mapping, expanded, valueConditions, ctx));
         }
 
         if (subQueries.isEmpty()) {
