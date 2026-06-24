@@ -629,5 +629,61 @@
     "tableName": "consent",
     "patientRefPath": "patient.reference",
     "termCodeFilter": { "path": "provision.provision.code.coding" }
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Laboruntersuchung", "display": "Laboruntersuchung", "version": "1.0.0" },
+    "key": { "system": "http://loinc.org", "code": "1656-8", "display": "11-Deoxycorticosterone [Mass/volume] in Serum or Plasma" },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "code.coding" },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Laboruntersuchung", "display": "Laboruntersuchung", "version": "1.0.0" },
+    "key": { "system": "http://loinc.org", "code": "10965-2", "display": "17-Hydroxyprogesterone [Mass/volume] in Serum or Plasma --30 minutes post 250 ug corticotropin IM" },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "code.coding" },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Laboruntersuchung", "display": "Laboruntersuchung", "version": "1.0.0" },
+    "key": { "system": "http://loinc.org", "code": "26584-3", "display": "1-Methylhistidine [Moles/volume] in Cerebral spinal fluid" },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "code.coding" },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Laboruntersuchung", "display": "Laboruntersuchung", "version": "1.0.0" },
+    "key": { "system": "http://loinc.org", "code": "1989-3", "display": "25-hydroxyvitamin D3 [Mass/volume] in Serum or Plasma" },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "code.coding" },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Laboruntersuchung", "display": "Laboruntersuchung", "version": "1.0.0" },
+    "key": { "system": "http://loinc.org", "code": "62290-2", "display": "1,25-Dihydroxyvitamin D [Mass/volume] in Serum or Plasma" },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "code.coding" },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Laboruntersuchung", "display": "Laboruntersuchung", "version": "1.0.0" },
+    "key": { "system": "http://loinc.org", "code": "20633-4", "display": "1-Methylhistidine [Moles/volume] in Serum or Plasma" },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "code.coding" },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
+  },
+  {
+    "context": { "system": "fdpg.mii.cds", "code": "Laboruntersuchung", "display": "Laboruntersuchung", "version": "1.0.0" },
+    "key": { "system": "http://loinc.org", "code": "14114-3", "display": "17-Hydroxyprogesterone [Mass/volume] in Serum or Plasma --1 hour post 250 ug corticotropin IM" },
+    "tableName": "observation",
+    "patientRefPath": "subject.reference",
+    "termCodeFilter": { "path": "code.coding" },
+    "dateFilter": { "path": "effectivedatetime", "type": "DATETIME" }
   }
 ]

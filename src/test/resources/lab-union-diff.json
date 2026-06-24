@@ -1,0 +1,133 @@
+{
+        "version": "http://to_be_decided.com/draft-1/schema#",
+        "display": "Ausgewählte Merkmale",
+        "inclusionCriteria": [
+            [
+                {
+                    "termCodes": [
+                        {
+                            "code": "1656-8",
+                            "display": "11-Deoxycorticosterone [Mass/volume] in Serum or Plasma",
+                            "system": "http://loinc.org",
+                            "version": "2.81"
+                        }
+                    ],
+                    "context": {
+                        "code": "Laboruntersuchung",
+                        "display": "Laboruntersuchung",
+                        "system": "fdpg.mii.cds",
+                        "version": "1.0.0"
+                    }
+                },
+                {
+                    "termCodes": [
+                        {
+                            "code": "10965-2",
+                            "display": "17-Hydroxyprogesterone [Mass/volume] in Serum or Plasma --30 minutes post 250 ug corticotropin IM",
+                            "system": "http://loinc.org",
+                            "version": "2.81"
+                        }
+                    ],
+                    "context": {
+                        "code": "Laboruntersuchung",
+                        "display": "Laboruntersuchung",
+                        "system": "fdpg.mii.cds",
+                        "version": "1.0.0"
+                    }
+                }
+            ],
+            [
+                {
+                    "termCodes": [
+                        {
+                            "code": "26584-3",
+                            "display": "1-Methylhistidine [Moles/volume] in Cerebral spinal fluid",
+                            "system": "http://loinc.org",
+                            "version": "2.81"
+                        }
+                    ],
+                    "context": {
+                        "code": "Laboruntersuchung",
+                        "display": "Laboruntersuchung",
+                        "system": "fdpg.mii.cds",
+                        "version": "1.0.0"
+                    },
+                    "timeRestriction": {
+                        "beforeDate": "2026-06-16"
+                    }
+                },
+                {
+                    "termCodes": [
+                        {
+                            "code": "1989-3",
+                            "display": "25-hydroxyvitamin D3 [Mass/volume] in Serum or Plasma",
+                            "system": "http://loinc.org",
+                            "version": "2.81"
+                        }
+                    ],
+                    "context": {
+                        "code": "Laboruntersuchung",
+                        "display": "Laboruntersuchung",
+                        "system": "fdpg.mii.cds",
+                        "version": "1.0.0"
+                    },
+                    "timeRestriction": {
+                        "beforeDate": "2026-06-06"
+                    }
+                },
+                {
+                    "termCodes": [
+                        {
+                            "code": "62290-2",
+                            "display": "1,25-Dihydroxyvitamin D [Mass/volume] in Serum or Plasma",
+                            "system": "http://loinc.org",
+                            "version": "2.81"
+                        }
+                    ],
+                    "context": {
+                        "code": "Laboruntersuchung",
+                        "display": "Laboruntersuchung",
+                        "system": "fdpg.mii.cds",
+                        "version": "1.0.0"
+                    },
+                    "timeRestriction": {
+                        "beforeDate": "2026-06-16"
+                    }
+                }
+            ],
+            [
+                {
+                    "termCodes": [
+                        {
+                            "code": "20633-4",
+                            "display": "1-Methylhistidine [Moles/volume] in Serum or Plasma",
+                            "system": "http://loinc.org",
+                            "version": "2.81"
+                        }
+                    ],
+                    "context": {
+                        "code": "Laboruntersuchung",
+                        "display": "Laboruntersuchung",
+                        "system": "fdpg.mii.cds",
+                        "version": "1.0.0"
+                    }
+                },
+                {
+                    "termCodes": [
+                        {
+                            "code": "14114-3",
+                            "display": "17-Hydroxyprogesterone [Mass/volume] in Serum or Plasma --1 hour post 250 ug corticotropin IM",
+                            "system": "http://loinc.org",
+                            "version": "2.81"
+                        }
+                    ],
+                    "context": {
+                        "code": "Laboruntersuchung",
+                        "display": "Laboruntersuchung",
+                        "system": "fdpg.mii.cds",
+                        "version": "1.0.0"
+                    }
+                }
+            ]
+        ]
+    }

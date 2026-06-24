@@ -1,9 +1,11 @@
 package de.medizininformatik.ccdl2deltalake;
 
+import de.medizininformatik.ccdl2deltalake.model.ContextualTermCode;
 import de.medizininformatik.ccdl2deltalake.model.MappingContext;
-import de.medizininformatik.ccdl2deltalake.model.structured_query.Criterion;
-import de.medizininformatik.ccdl2deltalake.model.structured_query.StructuredQuery;
+import de.medizininformatik.ccdl2deltalake.model.structured_query.*;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,7 +80,7 @@ public class Translator {
     }
 
     private String unionGroup(List<Criterion> criteria) {
-        var sqls = criteria.stream()
+        var sqls = mergeConceptCriteria(criteria).stream()
             .map(c -> c.toSql(mappingContext))
             .toList();
         if (sqls.size() == 1) return sqls.get(0);
@@ -95,5 +97,67 @@ public class Translator {
         return sqls.stream()
             .map(s -> "(\n" + s + "\n)")
             .collect(Collectors.joining("\nINTERSECT\n"));
+    }
+
+    /**
+     * Merges ConceptCriteria within a UNION group when they share the same structural signature
+     * (same table, patientRefPath, termCodeFilter, and timeRestriction) and have no attribute
+     * filters. Merged criteria produce a single SELECT with an expanded IN clause instead of N
+     * separate table scans.
+     */
+    private List<Criterion> mergeConceptCriteria(List<Criterion> criteria) {
+        var result = new ArrayList<Criterion>();
+        var groups = new LinkedHashMap<String, List<ConceptCriterion>>();
+
+        for (var c : criteria) {
+            if (!(c instanceof ConceptCriterion cc) || !cc.getAttributeFilters().isEmpty()) {
+                result.add(c);
+                continue;
+            }
+            var key = conceptMergeKey(cc);
+            if (key == null) {
+                result.add(c);
+            } else {
+                groups.computeIfAbsent(key, k -> new ArrayList<>()).add(cc);
+            }
+        }
+
+        for (var group : groups.values()) {
+            if (group.size() == 1) {
+                result.add(group.get(0));
+            } else {
+                var allCodes = group.stream()
+                    .flatMap(cc -> cc.getConcept().termCodes().stream())
+                    .distinct()
+                    .toList();
+                result.add(ConceptCriterion.of(
+                    ContextualConcept.of(group.get(0).getConcept().context(), allCodes),
+                    group.get(0).getTimeRestriction()
+                ));
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns a string key capturing the structural identity of a ConceptCriterion for merging:
+     * tableName, patientRefPath, termCodeFilter path+join, and timeRestriction.
+     * Returns null if the mapping cannot be resolved or the criterion has no term codes.
+     */
+    private String conceptMergeKey(ConceptCriterion cc) {
+        if (cc.getConcept().termCodes().isEmpty()) return null;
+        var firstTc = cc.getConcept().termCodes().get(0);
+        var ctc = ContextualTermCode.of(cc.getConcept().context(), firstTc);
+        var mapping = mappingContext.findMapping(ctc).orElse(null);
+        if (mapping == null) return null;
+
+        var tcfKey = mapping.getTermCodeFilter()
+            .map(tcf -> tcf.path() + tcf.getJoin().map(j -> "|" + j.table() + "|" + j.primaryRefPath() + "|" + j.secondaryIdPath()).orElse(""))
+            .orElse("");
+
+        var trKey = cc.getTimeRestriction() == null ? "" : cc.getTimeRestriction().toString();
+
+        return mapping.tableName() + "|" + mapping.patientRefPath() + "|" + tcfKey + "|" + trKey;
     }
 }

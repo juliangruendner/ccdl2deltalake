@@ -108,7 +108,7 @@ class TranslatorTest {
     }
 
     @Test
-    void orWithinGroup_generatesUnion() {
+    void orWithinGroup_mergesCompatibleCriteria() {
         var query = StructuredQuery.of(List.of(
             List.of(
                 ConceptCriterion.of(ContextualConcept.of(DIAGNOSE_CTX, List.of(MIGRAINE))),
@@ -117,7 +117,9 @@ class TranslatorTest {
         ));
         var sql = SqlWriter.write("or_within_group", translator.toSql(query));
 
-        assertThat(sql).contains("UNION");
+        // Both codes map to the same condition table → merged into one SELECT with combined IN clause
+        assertThat(sql).doesNotContain("UNION");
+        assertThat(sql).containsOnlyOnce("FROM condition t");
         assertThat(sql).contains("'37796009'");
         assertThat(sql).contains("'4556007'");
     }
@@ -402,13 +404,14 @@ class TranslatorTest {
     @Test
     void monitoring_hemoglobin() throws Exception {
         var sql = translateMonitoring("hemoglobin-718-7");
-        // 10 LOINC codes unioned
+        // 10 LOINC codes merged into a single SELECT with one IN clause — no UNION
         assertThat(sql).contains("FROM observation t");
         assertThat(sql).contains("'718-7'");
         assertThat(sql).contains("'59260-0'");
         assertThat(sql).contains("'4548-4'");
         assertThat(sql).contains("'94500-6'");
-        assertThat(sql).contains("UNION");
+        assertThat(sql).doesNotContain("UNION");
+        assertThat(sql).containsOnlyOnce("FROM observation t");
     }
 
     @Test
@@ -424,10 +427,12 @@ class TranslatorTest {
     @Test
     void monitoring_specimenTest() throws Exception {
         var sql = translateMonitoring("specimen-test");
+        // All specimen codes map to the same specimen table → merged into one SELECT
         assertThat(sql).contains("FROM specimen t");
         assertThat(sql).contains("'119297000'");
         assertThat(sql).contains("'119361006'");
-        assertThat(sql).contains("UNION");
+        assertThat(sql).doesNotContain("UNION");
+        assertThat(sql).containsOnlyOnce("FROM specimen t");
     }
 
     @Test
@@ -457,6 +462,41 @@ class TranslatorTest {
         assertThatThrownBy(() -> translator.toSql(query))
             .isInstanceOf(MappingNotFoundException.class)
             .hasMessageContaining("UNKNOWN-CODE");
+    }
+
+    @Test
+    void labUnionDiff_mergesCompatibleCodesCollapsesUnequalTimeRestrictions() throws Exception {
+        var json = Files.readString(Path.of("src/test/resources/lab-union-diff.json"));
+        var query = new com.fasterxml.jackson.databind.ObjectMapper()
+            .readValue(json, StructuredQuery.class);
+        var sql = SqlWriter.write("lab-union-diff", translatorWithExampleTree.toSql(query));
+
+        // Group 1: two codes, no time restriction → merged into one SELECT, no UNION within group
+        assertThat(sql).contains("'1656-8'");
+        assertThat(sql).contains("'10965-2'");
+
+        // Group 2: three codes with mixed time restrictions:
+        //   '26584-3' beforeDate 2026-06-16 and '62290-2' beforeDate 2026-06-16 → merged
+        //   '1989-3'  beforeDate 2026-06-06 → separate (different date)
+        assertThat(sql).contains("'26584-3'");
+        assertThat(sql).contains("'1989-3'");
+        assertThat(sql).contains("'62290-2'");
+
+        // Group 3: two codes, no time restriction → merged into one SELECT, no UNION within group
+        assertThat(sql).contains("'20633-4'");
+        assertThat(sql).contains("'14114-3'");
+
+        // Group 1: '1656-8' and '10965-2' should appear together in one IN clause
+        assertThat(sql).containsPattern("'1656-8'.*'10965-2'|'10965-2'.*'1656-8'");
+
+        // Group 2: '26584-3' and '62290-2' share the same date → appear in the same IN clause
+        assertThat(sql).containsPattern("'26584-3'.*'62290-2'|'62290-2'.*'26584-3'");
+
+        // Group 3: '20633-4' and '14114-3' should appear together in one IN clause
+        assertThat(sql).containsPattern("'20633-4'.*'14114-3'|'14114-3'.*'20633-4'");
+
+        // The three INTERSECT groups produce overall INTERSECT structure
+        assertThat(sql).contains("INTERSECT");
     }
 
 }
