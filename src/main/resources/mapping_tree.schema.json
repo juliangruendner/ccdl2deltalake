@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ccdl2deltalake/mapping_tree.schema.json",
+  "title": "ccdl2deltalake Mapping Tree",
+  "description": "Ontology tree used by MappingContext to expand a concept code to its descendant codes (IN-clause broadening). Array of modules, one per context/coding-system combination.",
+  "type": "array",
+  "items": { "$ref": "#/definitions/MappingTreeModule" },
+  "definitions": {
+    "TermCode": {
+      "type": "object",
+      "required": ["system", "code", "display"],
+      "additionalProperties": false,
+      "properties": {
+        "system":  { "type": "string" },
+        "code":    { "type": "string" },
+        "display": { "type": "string" },
+        "version": { "type": "string" }
+      }
+    },
+    "MappingTreeModuleEntry": {
+      "type": "object",
+      "required": ["key", "parents", "children"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Code value that identifies this node within the module's coding system"
+        },
+        "parents": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Keys of direct parent nodes (empty for root concepts)"
+        },
+        "children": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Keys of direct child nodes (empty for leaf concepts)"
+        }
+      }
+    },
+    "MappingTreeModule": {
+      "type": "object",
+      "required": ["context", "system", "entries"],
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/definitions/TermCode",
+          "description": "CCDL context this module belongs to (e.g. 'Diagnose')"
+        },
+        "system": {
+          "type": "string",
+          "description": "Coding system URI for all keys/parents/children in this module (e.g. 'http://snomed.info/sct')"
+        },
+        "version": {
+          "type": "string",
+          "description": "Optional version of the coding system covered by this module"
+        },
+        "entries": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/MappingTreeModuleEntry" },
+          "description": "Flat list of all nodes in the ontology subtree covered by this module"
+        }
+      }
+    }
+  }
+}

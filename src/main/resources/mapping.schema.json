@@ -1,0 +1,135 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ccdl2deltalake/mapping.schema.json",
+  "title": "ccdl2deltalake Mapping",
+  "description": "Array of mapping entries used by MappingContext to resolve CCDL concepts to Trino table/column paths.",
+  "type": "array",
+  "items": { "$ref": "#/definitions/Mapping" },
+  "definitions": {
+    "TermCode": {
+      "type": "object",
+      "required": ["system", "code", "display"],
+      "additionalProperties": false,
+      "properties": {
+        "system":  { "type": "string", "description": "Coding system URI" },
+        "code":    { "type": "string", "description": "Code value" },
+        "display": { "type": "string", "description": "Human-readable label" },
+        "version": { "type": "string", "description": "Optional code system version" }
+      }
+    },
+    "TermCodeJoin": {
+      "type": "object",
+      "required": ["table", "primaryRefPath", "secondaryIdPath"],
+      "additionalProperties": false,
+      "properties": {
+        "table":            { "type": "string", "description": "Name of the joined table (e.g. 'medication')" },
+        "primaryRefPath":   { "type": "string", "description": "Dot-path in the primary table pointing to the joined resource reference (e.g. 'medicationreference.reference')" },
+        "secondaryIdPath":  { "type": "string", "description": "Dot-path in the joined table holding the resource ID (e.g. 'id_versioned')" }
+      }
+    },
+    "TermCodeFilter": {
+      "type": "object",
+      "required": ["path"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Dot-path to the coding array that holds the term code (e.g. 'code.coding')"
+        },
+        "join": {
+          "$ref": "#/definitions/TermCodeJoin",
+          "description": "Optional cross-table join for codes stored in a separate resource (e.g. Medication)"
+        }
+      }
+    },
+    "QuantityValueFilter": {
+      "type": "object",
+      "required": ["type", "path", "valueField", "unitCodeField"],
+      "additionalProperties": false,
+      "properties": {
+        "type":          { "type": "string", "const": "QUANTITY" },
+        "path":          { "type": "string", "description": "Dot-path to the quantity struct (e.g. 'valuequantity')" },
+        "valueField":    { "type": "string", "description": "Field name for the numeric value within the struct (e.g. 'value')" },
+        "unitCodeField": { "type": "string", "description": "Field name for the unit code within the struct (e.g. 'code')" }
+      }
+    },
+    "CodingScalarValueFilter": {
+      "type": "object",
+      "required": ["type", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "const": "CODING_SCALAR" },
+        "path": { "type": "string", "description": "Dot-path to the scalar coding struct (e.g. 'valuecodeableconcept.coding')" }
+      }
+    },
+    "AgeValueFilter": {
+      "type": "object",
+      "required": ["type", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "const": "AGE" },
+        "path": { "type": "string", "description": "Dot-path to the birth date field used to compute age" }
+      }
+    },
+    "ValueFilter": {
+      "description": "Discriminated union on 'type'. Describes where and how to find the clinical value for comparisons.",
+      "oneOf": [
+        { "$ref": "#/definitions/QuantityValueFilter" },
+        { "$ref": "#/definitions/CodingScalarValueFilter" },
+        { "$ref": "#/definitions/AgeValueFilter" }
+      ]
+    },
+    "DateFilter": {
+      "type": "object",
+      "required": ["path", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "path": { "type": "string", "description": "Dot-path to the date/datetime column (e.g. 'recordeddate')" },
+        "type": {
+          "type": "string",
+          "enum": ["DATE", "DATETIME"],
+          "description": "DATE wraps the column with DATE(); DATETIME wraps it with FROM_ISO8601_TIMESTAMP()"
+        }
+      }
+    },
+    "SimpleAttributeFilterMapping": {
+      "type": "object",
+      "required": ["attributeCode", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "attributeCode":  { "$ref": "#/definitions/TermCode", "description": "Concept identifying this attribute in CCDL queries" },
+        "path":           { "type": "string", "description": "Dot-path to the attribute column" },
+        "type":           { "type": "string", "enum": ["QUANTITY", "CODING_SCALAR", "AGE"], "description": "Value type for comparisons; omit for concept-only attributes" },
+        "valueField":     { "type": "string", "description": "Field name for the numeric value (required when type is QUANTITY)" },
+        "unitCodeField":  { "type": "string", "description": "Field name for the unit code (required when type is QUANTITY)" }
+      }
+    },
+    "ReferenceAttributeFilterMapping": {
+      "type": "object",
+      "required": ["attributeCode", "referenceValuePath"],
+      "additionalProperties": false,
+      "properties": {
+        "attributeCode":       { "$ref": "#/definitions/TermCode", "description": "Concept identifying this attribute in CCDL queries" },
+        "referenceValuePath":  { "type": "string", "description": "Dot-path to the reference value (e.g. 'encounter.reference')" },
+        "extensionArrayPath":  { "type": "string", "description": "Dot-path to an extension array when the reference is encoded as an extension" },
+        "extensionUrl":        { "type": "string", "description": "Extension URL used to select the correct extension element" }
+      }
+    },
+    "Mapping": {
+      "type": "object",
+      "required": ["context", "key", "tableName", "patientRefPath"],
+      "additionalProperties": false,
+      "properties": {
+        "context":                    { "$ref": "#/definitions/TermCode",                     "description": "CCDL context code that scopes this mapping (e.g. 'Diagnose')" },
+        "key":                        { "$ref": "#/definitions/TermCode",                     "description": "Clinical concept this entry maps (e.g. SNOMED 37796009)" },
+        "tableName":                  { "type": "string",                                      "description": "Trino table name (without catalog/schema prefix, e.g. 'condition')" },
+        "patientRefPath":             { "type": "string",                                      "description": "Dot-path to the patient reference column (e.g. 'subject.reference')" },
+        "termCodeFilter":             { "$ref": "#/definitions/TermCodeFilter",               "description": "Location of the coding array used to filter by concept code" },
+        "valueFilter":                { "$ref": "#/definitions/ValueFilter",                   "description": "Location and type of the clinical value used for numeric/coded comparisons" },
+        "dateFilter":                 { "$ref": "#/definitions/DateFilter",                    "description": "Location and type of the date column used for time restrictions" },
+        "simpleAttributeFilters":     { "type": "array", "items": { "$ref": "#/definitions/SimpleAttributeFilterMapping" },    "description": "Scalar or quantity attribute filters (e.g. body weight)" },
+        "referenceAttributeFilters":  { "type": "array", "items": { "$ref": "#/definitions/ReferenceAttributeFilterMapping" }, "description": "Reference-typed attribute filters (e.g. encounter class)" }
+      }
+    }
+  }
+}
