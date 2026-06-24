@@ -369,8 +369,8 @@ class SqCompatibilityTest {
         var sql = translate(SQ_ROP + "Diagnose-TimeRestriction.json");
 
         assertThat(sql).contains("tc.code IN ('S14.11')");
-        assertThat(sql).contains("DATE(t.recordeddate) >= DATE('2023-02-01')");
-        assertThat(sql).contains("DATE(t.recordeddate) <= DATE('2023-02-28')");
+        assertThat(sql).contains("DATE(FROM_ISO8601_TIMESTAMP(t.recordeddate)) >= DATE('2023-02-01')");
+        assertThat(sql).contains("DATE(FROM_ISO8601_TIMESTAMP(t.recordeddate)) <= DATE('2023-02-28')");
     }
 
     @Test

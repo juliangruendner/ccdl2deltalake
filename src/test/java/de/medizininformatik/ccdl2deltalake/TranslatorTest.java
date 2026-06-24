@@ -144,8 +144,8 @@ class TranslatorTest {
             ContextualConcept.of(DIAGNOSE_CTX, List.of(MIGRAINE)), tr);
         var sql = SqlWriter.write("time_restriction", criterion.toSql(ctx));
 
-        assertThat(sql).contains("DATE(t.recordeddate) >= DATE('2024-01-01')");
-        assertThat(sql).contains("DATE(t.recordeddate) <= DATE('2024-12-31')");
+        assertThat(sql).contains("DATE(FROM_ISO8601_TIMESTAMP(t.recordeddate)) >= DATE('2024-01-01')");
+        assertThat(sql).contains("DATE(FROM_ISO8601_TIMESTAMP(t.recordeddate)) <= DATE('2024-12-31')");
     }
 
     @Test
@@ -195,7 +195,7 @@ class TranslatorTest {
         assertThat(sql).contains("'E14'");
         assertThat(sql).contains("'E10.01'");
         assertThat(sql).contains("'E11.90'");
-        assertThat(sql).contains("DATE(t.recordeddate) <= DATE('2026-06-16')");
+        assertThat(sql).contains("DATE(FROM_ISO8601_TIMESTAMP(t.recordeddate)) <= DATE('2026-06-16')");
     }
 
     @Test

@@ -5,7 +5,7 @@
     "tableName": "condition",
     "patientRefPath": "subject.reference",
     "termCodeFilter": { "path": "code.coding" },
-    "dateFilter": { "path": "recordeddate", "type": "DATE" }
+    "dateFilter": { "path": "recordeddate", "type": "DATETIME" }
   },
   {
     "context": { "system": "fdpg.mii.cds", "code": "Diagnose", "display": "Diagnose", "version": "1.0.0" },
@@ -20,7 +20,7 @@
     "tableName": "condition",
     "patientRefPath": "subject.reference",
     "termCodeFilter": { "path": "code.coding" },
-    "dateFilter": { "path": "recordeddate", "type": "DATE" }
+    "dateFilter": { "path": "recordeddate", "type": "DATETIME" }
   },
   {
     "context": { "system": "fdpg.mii.cds", "code": "Diagnose", "display": "Diagnose", "version": "1.0.0" },
@@ -28,7 +28,7 @@
     "tableName": "condition",
     "patientRefPath": "subject.reference",
     "termCodeFilter": { "path": "code.coding" },
-    "dateFilter": { "path": "recordeddate", "type": "DATE" }
+    "dateFilter": { "path": "recordeddate", "type": "DATETIME" }
   },
   {
     "context": { "system": "fdpg.mii.cds", "code": "Diagnose", "display": "Diagnose", "version": "1.0.0" },
@@ -36,7 +36,7 @@
     "tableName": "condition",
     "patientRefPath": "subject.reference",
     "termCodeFilter": { "path": "code.coding" },
-    "dateFilter": { "path": "recordeddate", "type": "DATE" }
+    "dateFilter": { "path": "recordeddate", "type": "DATETIME" }
   },
   {
     "context": { "system": "fdpg.mii.cds", "code": "Diagnose", "display": "Diagnose", "version": "1.0.0" },
@@ -44,7 +44,7 @@
     "tableName": "condition",
     "patientRefPath": "subject.reference",
     "termCodeFilter": { "path": "code.coding" },
-    "dateFilter": { "path": "recordeddate", "type": "DATE" }
+    "dateFilter": { "path": "recordeddate", "type": "DATETIME" }
   },
   {
     "context": { "system": "fdpg.mii.cds", "code": "Diagnose", "display": "Diagnose", "version": "1.0.0" },
@@ -52,7 +52,7 @@
     "tableName": "condition",
     "patientRefPath": "subject.reference",
     "termCodeFilter": { "path": "code.coding" },
-    "dateFilter": { "path": "recordeddate", "type": "DATE" }
+    "dateFilter": { "path": "recordeddate", "type": "DATETIME" }
   },
   {
     "context": { "system": "fdpg.mii.cds", "code": "Diagnose", "display": "Diagnose", "version": "1.0.0" },
@@ -60,7 +60,7 @@
     "tableName": "condition",
     "patientRefPath": "subject.reference",
     "termCodeFilter": { "path": "code.coding" },
-    "dateFilter": { "path": "recordeddate", "type": "DATE" }
+    "dateFilter": { "path": "recordeddate", "type": "DATETIME" }
   },
   {
     "context": { "system": "fdpg.mii.cds", "code": "Laboruntersuchung", "display": "Laboruntersuchung", "version": "1.0.0" },
