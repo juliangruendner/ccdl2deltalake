@@ -1,0 +1,109 @@
+{
+  "resourceType": "Parameters",
+  "parameter": [
+    {
+      "name": "source",
+      "part": [
+        {"name": "resourceType", "valueCode": "Condition"},
+        {"name": "url", "valueUrl": "file:///tmp/import/Condition.ndjson"},
+        {"name": "mode", "valueCode": "overwrite"}
+      ]
+    },
+    {
+      "name": "source",
+      "part": [
+        {"name": "resourceType", "valueCode": "Consent"},
+        {"name": "url", "valueUrl": "file:///tmp/import/Consent.ndjson"},
+        {"name": "mode", "valueCode": "overwrite"}
+      ]
+    },
+    {
+      "name": "source",
+      "part": [
+        {"name": "resourceType", "valueCode": "DiagnosticReport"},
+        {"name": "url", "valueUrl": "file:///tmp/import/DiagnosticReport.ndjson"},
+        {"name": "mode", "valueCode": "overwrite"}
+      ]
+    },
+    {
+      "name": "source",
+      "part": [
+        {"name": "resourceType", "valueCode": "Encounter"},
+        {"name": "url", "valueUrl": "file:///tmp/import/Encounter.ndjson"},
+        {"name": "mode", "valueCode": "overwrite"}
+      ]
+    },
+    {
+      "name": "source",
+      "part": [
+        {"name": "resourceType", "valueCode": "Medication"},
+        {"name": "url", "valueUrl": "file:///tmp/import/Medication.ndjson"},
+        {"name": "mode", "valueCode": "overwrite"}
+      ]
+    },
+    {
+      "name": "source",
+      "part": [
+        {"name": "resourceType", "valueCode": "MedicationAdministration"},
+        {"name": "url", "valueUrl": "file:///tmp/import/MedicationAdministration.ndjson"},
+        {"name": "mode", "valueCode": "overwrite"}
+      ]
+    },
+    {
+      "name": "source",
+      "part": [
+        {"name": "resourceType", "valueCode": "MedicationRequest"},
+        {"name": "url", "valueUrl": "file:///tmp/import/MedicationRequest.ndjson"},
+        {"name": "mode", "valueCode": "overwrite"}
+      ]
+    },
+    {
+      "name": "source",
+      "part": [
+        {"name": "resourceType", "valueCode": "MedicationStatement"},
+        {"name": "url", "valueUrl": "file:///tmp/import/MedicationStatement.ndjson"},
+        {"name": "mode", "valueCode": "overwrite"}
+      ]
+    },
+    {
+      "name": "source",
+      "part": [
+        {"name": "resourceType", "valueCode": "Observation"},
+        {"name": "url", "valueUrl": "file:///tmp/import/Observation.ndjson"},
+        {"name": "mode", "valueCode": "overwrite"}
+      ]
+    },
+    {
+      "name": "source",
+      "part": [
+        {"name": "resourceType", "valueCode": "Patient"},
+        {"name": "url", "valueUrl": "file:///tmp/import/Patient.ndjson"},
+        {"name": "mode", "valueCode": "overwrite"}
+      ]
+    },
+    {
+      "name": "source",
+      "part": [
+        {"name": "resourceType", "valueCode": "Procedure"},
+        {"name": "url", "valueUrl": "file:///tmp/import/Procedure.ndjson"},
+        {"name": "mode", "valueCode": "overwrite"}
+      ]
+    },
+    {
+      "name": "source",
+      "part": [
+        {"name": "resourceType", "valueCode": "ServiceRequest"},
+        {"name": "url", "valueUrl": "file:///tmp/import/ServiceRequest.ndjson"},
+        {"name": "mode", "valueCode": "overwrite"}
+      ]
+    },
+    {
+      "name": "source",
+      "part": [
+        {"name": "resourceType", "valueCode": "Specimen"},
+        {"name": "url", "valueUrl": "file:///tmp/import/Specimen.ndjson"},
+        {"name": "mode", "valueCode": "overwrite"}
+      ]
+    }
+  ]
+}

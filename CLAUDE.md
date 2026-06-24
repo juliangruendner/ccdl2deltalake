@@ -21,7 +21,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Integration test dependency
 
-The integration tests (`TrinoIT`) require the `trino-on-fhir` stack at `/Users/pi19vypi/code/trino-on-fhir` to be running (`docker compose up`). Trino must be reachable at `http://localhost:8080` with catalog `fhir`, schema `default`, tables: `condition`, `observation`, `patient`, `encounter`.
+The integration tests (`TrinoIT`) are **self-contained**: they spin up the full trino-on-fhir stack (MinIO, Pathling, Hive Metastore, Trino) automatically via Testcontainers using `src/test/resources/docker/compose-it.yaml`. Docker must be running. No external stack is required.
+
+The first run pulls Docker images and runs Pathling import (~5–15 min). Subsequent runs reuse cached images and are faster.
 
 ## Architecture
 

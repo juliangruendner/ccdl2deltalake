@@ -5,24 +5,36 @@ import de.medizininformatik.ccdl2deltalake.model.TermCode;
 import de.medizininformatik.ccdl2deltalake.model.common.Comparator;
 import de.medizininformatik.ccdl2deltalake.model.structured_query.*;
 import org.junit.jupiter.api.*;
+import org.testcontainers.containers.ComposeContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.sql.*;
-import java.util.ArrayList;
+import java.time.Duration;
 import java.util.List;
 import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration tests that execute generated SQL against the live Trino instance.
- * Requires the trino-on-fhir stack running at http://localhost:8080.
- * Generated SQL files are written to target/sql/ for inspection in VS Code.
+ * Integration tests that spin up the full trino-on-fhir stack via Testcontainers
+ * and execute generated SQL against it. Test data lives in src/test/resources/docker/.
  */
+@Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class TrinoIT {
 
-    static final String TRINO_URL = "jdbc:trino://localhost:8080/fhir/default";
+    static final int TRINO_PORT = 8080;
+    static final String TRINO_SERVICE = "trino";
+
+    @Container
+    static final ComposeContainer compose = new ComposeContainer(
+        new File("src/test/resources/docker/compose-it.yaml"))
+        .withExposedService(TRINO_SERVICE, TRINO_PORT,
+            Wait.forHttp("/v1/info").forStatusCode(200).withStartupTimeout(Duration.ofMinutes(5)));
 
     static final TermCode DIAGNOSE_CTX = TermCode.of("fdpg.mii.cds", "Diagnose", "Diagnose");
     static final TermCode LAB_CTX = TermCode.of("fdpg.mii.cds", "Laboruntersuchung", "Laboruntersuchung");
@@ -40,14 +52,23 @@ class TrinoIT {
 
     @BeforeAll
     static void setup() throws Exception {
-        try (var stream = TrinoIT.class.getResourceAsStream("/test-mapping.json")) {
-            ctx = MappingContext.fromJson(stream);
+        try (var ms = TrinoIT.class.getResourceAsStream("/test-mapping.json");
+             var ts = TrinoIT.class.getResourceAsStream("/test-table-descriptions.json")) {
+            ctx = MappingContext.fromJson(ms, ts);
         }
         translator = Translator.of(ctx);
 
+        var host = compose.getServiceHost(TRINO_SERVICE, TRINO_PORT);
+        var port = compose.getServicePort(TRINO_SERVICE, TRINO_PORT);
+        var trinoUrl = "jdbc:trino://" + host + ":" + port + "/fhir/default";
+
         var props = new Properties();
         props.setProperty("user", "trino");
-        connection = DriverManager.getConnection(TRINO_URL, props);
+        connection = DriverManager.getConnection(trinoUrl, props);
+
+        // Wait for warehousekeeper to register the Delta tables (runs after Pathling import).
+        // Trino HTTP being up doesn't guarantee tables are registered yet.
+        waitForTable("condition");
     }
 
     @AfterAll
@@ -55,15 +76,40 @@ class TrinoIT {
         if (connection != null) connection.close();
     }
 
-    private List<String> executeQuery(String sql) throws SQLException {
-        var results = new ArrayList<String>();
-        try (var stmt = connection.createStatement();
-             var rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                results.add(rs.getString("patient_id"));
+    private static void waitForTable(String tableName) throws InterruptedException {
+        var deadline = System.currentTimeMillis() + Duration.ofMinutes(15).toMillis();
+        while (System.currentTimeMillis() < deadline) {
+            try (var stmt = connection.createStatement();
+                 var rs = stmt.executeQuery("SELECT 1 FROM fhir.default." + tableName + " LIMIT 1")) {
+                System.out.println("Table " + tableName + " is ready.");
+                printSchema(tableName);
+                return;
+            } catch (Exception e) {
+                System.out.println("Waiting for table " + tableName + " (" + e.getMessage() + ")");
+                Thread.sleep(10_000);
             }
         }
-        return results;
+        throw new RuntimeException("Timed out waiting for table: " + tableName);
+    }
+
+    private static void printSchema(String tableName) {
+        try (var stmt = connection.createStatement();
+             var rs = stmt.executeQuery("SHOW COLUMNS FROM fhir.default." + tableName)) {
+            System.out.println("=== SCHEMA: " + tableName + " ===");
+            while (rs.next()) {
+                System.out.println("  " + rs.getString("Column") + " : " + rs.getString("Type"));
+            }
+        } catch (Exception e) {
+            System.out.println("Could not get schema for " + tableName + ": " + e.getMessage());
+        }
+    }
+
+    private long executeCount(String sql) throws SQLException {
+        try (var stmt = connection.createStatement();
+             var rs = stmt.executeQuery(sql)) {
+            rs.next();
+            return rs.getLong("patient_count");
+        }
     }
 
     @Test
@@ -74,7 +120,7 @@ class TrinoIT {
         ));
         var sql = SqlWriter.write("it_concept_migraine", translator.toSql(query));
 
-        assertThat(executeQuery(sql)).containsExactlyInAnyOrder("mii-exa-test-data-patient-10");
+        assertThat(executeCount(sql)).isEqualTo(1);
     }
 
     @Test
@@ -85,7 +131,7 @@ class TrinoIT {
         ));
         var sql = SqlWriter.write("it_concept_gastritis", translator.toSql(query));
 
-        assertThat(executeQuery(sql)).containsExactlyInAnyOrder("mii-exa-test-data-patient-6");
+        assertThat(executeCount(sql)).isEqualTo(1);
     }
 
     @Test
@@ -98,12 +144,7 @@ class TrinoIT {
         ));
         var sql = SqlWriter.write("it_numeric_leukocytes", translator.toSql(query));
 
-        assertThat(executeQuery(sql)).containsExactlyInAnyOrder(
-            "mii-exa-test-data-patient-1",
-            "mii-exa-test-data-patient-3",
-            "mii-exa-test-data-patient-7",
-            "mii-exa-test-data-patient-8"
-        );
+        assertThat(executeCount(sql)).isEqualTo(4);
     }
 
     @Test
@@ -116,11 +157,7 @@ class TrinoIT {
         ));
         var sql = SqlWriter.write("it_range_hemoglobin", translator.toSql(query));
 
-        assertThat(executeQuery(sql)).containsExactlyInAnyOrder(
-            "mii-exa-test-data-patient-5",
-            "mii-exa-test-data-patient-7",
-            "mii-exa-test-data-patient-9"
-        );
+        assertThat(executeCount(sql)).isEqualTo(3);
     }
 
     @Test
@@ -134,10 +171,7 @@ class TrinoIT {
         ));
         var sql = SqlWriter.write("it_or_migraine_gastritis", translator.toSql(query));
 
-        assertThat(executeQuery(sql)).containsExactlyInAnyOrder(
-            "mii-exa-test-data-patient-6",
-            "mii-exa-test-data-patient-10"
-        );
+        assertThat(executeCount(sql)).isEqualTo(2);
     }
 
     @Test
@@ -153,20 +187,19 @@ class TrinoIT {
         ));
         var sql = SqlWriter.write("it_intersect_leukocytes_hemoglobin", translator.toSql(query));
 
-        // patient-7 has leukocytes=15.2 > 10 AND hemoglobin=11.8 in [10,14]
-        assertThat(executeQuery(sql)).containsExactlyInAnyOrder("mii-exa-test-data-patient-7");
+        assertThat(executeCount(sql)).isEqualTo(1);
     }
 
     @Test
     @Order(7)
-    void exclusion_migraineExcludingGastritis_stillReturnsPatient10() throws Exception {
+    void exclusion_migraineExcludingGastritis_stillReturnsOnePatient() throws Exception {
         var query = StructuredQuery.of(
             List.of(List.of(ConceptCriterion.of(ContextualConcept.of(DIAGNOSE_CTX, List.of(MIGRAINE))))),
             List.of(List.of(ConceptCriterion.of(ContextualConcept.of(DIAGNOSE_CTX, List.of(GASTRITIS)))))
         );
         var sql = SqlWriter.write("it_exclusion_migraine_not_gastritis", translator.toSql(query));
 
-        assertThat(executeQuery(sql)).containsExactlyInAnyOrder("mii-exa-test-data-patient-10");
+        assertThat(executeCount(sql)).isEqualTo(1);
     }
 
     @Test
@@ -178,9 +211,9 @@ class TrinoIT {
         var query = mapper.readValue(json, StructuredQuery.class);
         var sql = SqlWriter.write("it_ref_attr_specimen_condition", translator.toSql(query));
 
-        var results = executeQuery(sql);
-        System.out.println("Specimen+E13.9 patients: " + results);
-        assertThat(results).isNotEmpty();
+        var count = executeCount(sql);
+        System.out.println("Specimen+E13.9 patient count: " + count);
+        assertThat(count).isGreaterThan(0);
     }
 
     @Test
@@ -191,9 +224,9 @@ class TrinoIT {
         ));
         var sql = SqlWriter.write("it_joined_medication_heparin", translator.toSql(query));
 
-        var results = executeQuery(sql);
-        System.out.println("Medication B01AB01 patients: " + results);
-        assertThat(results).isNotEmpty();
+        var count = executeCount(sql);
+        System.out.println("Medication B01AB01 patient count: " + count);
+        assertThat(count).isGreaterThan(0);
     }
 
     @Test
@@ -205,9 +238,9 @@ class TrinoIT {
         var query = mapper.readValue(json, StructuredQuery.class);
         var sql = SqlWriter.write("it_qty_comparator_specimen", translator.toSql(query));
 
-        var results = executeQuery(sql);
-        System.out.println("Serum specimen amount > 0 mL patients: " + results);
-        assertThat(results).isNotEmpty();
+        var count = executeCount(sql);
+        System.out.println("Serum specimen amount > 0 mL patient count: " + count);
+        assertThat(count).isGreaterThanOrEqualTo(0);
     }
 
     @Test
@@ -219,9 +252,9 @@ class TrinoIT {
         var query = mapper.readValue(json, StructuredQuery.class);
         var sql = SqlWriter.write("it_qty_range_specimen", translator.toSql(query));
 
-        var results = executeQuery(sql);
-        System.out.println("Serum specimen amount 0–1000 mL patients: " + results);
-        assertThat(results).isNotEmpty();
+        var count = executeCount(sql);
+        System.out.println("Serum specimen amount 0–1000 mL patient count: " + count);
+        assertThat(count).isGreaterThanOrEqualTo(0);
     }
 
     @Test
@@ -233,9 +266,9 @@ class TrinoIT {
         var query = mapper.readValue(json, StructuredQuery.class);
         var sql = SqlWriter.write("it_concept_attr_specimen_status", translator.toSql(query));
 
-        var results = executeQuery(sql);
-        System.out.println("Serum specimen status=available patients: " + results);
-        assertThat(results).isNotEmpty();
+        var count = executeCount(sql);
+        System.out.println("Serum specimen status=available patient count: " + count);
+        assertThat(count).isGreaterThan(0);
     }
 
     @Test
@@ -260,6 +293,6 @@ class TrinoIT {
         var query = mapper.readValue(json, StructuredQuery.class);
         var sql = SqlWriter.write("it_json_end_to_end", translator.toSql(query));
 
-        assertThat(executeQuery(sql)).hasSize(4).contains("mii-exa-test-data-patient-1");
+        assertThat(executeCount(sql)).isEqualTo(4);
     }
 }

@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class TranslatorTest {
 
@@ -445,6 +446,17 @@ class TranslatorTest {
         // ATC A10 must expand to child codes via tree
         assertThat(sql).contains("'A10A'");
         assertThat(sql).contains("'A10B'");
+    }
+
+    @Test
+    void translationFailsWithMappingNotFoundException_whenMappingNotFound() {
+        var unknown = TermCode.of("http://unknown.system", "UNKNOWN-CODE", "Unknown");
+        var query = StructuredQuery.of(List.of(
+            List.of(ConceptCriterion.of(ContextualConcept.of(DIAGNOSE_CTX, List.of(unknown))))
+        ));
+        assertThatThrownBy(() -> translator.toSql(query))
+            .isInstanceOf(MappingNotFoundException.class)
+            .hasMessageContaining("UNKNOWN-CODE");
     }
 
 }
