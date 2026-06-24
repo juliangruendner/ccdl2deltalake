@@ -24,7 +24,12 @@ public record AgeValueFilter(String path) implements ValueFilter {
 
     @Override
     public String valueSqlPath(String tableAlias) {
-        return "DATE_DIFF('year', DATE(" + tableAlias + "." + path + "), CURRENT_DATE)";
+        var col = tableAlias + "." + path;
+        // FHIR dates can be partial: YYYY, YYYY-MM, or YYYY-MM-DD — pad to full ISO date before casting
+        var padded = "CASE WHEN LENGTH(" + col + ") = 4 THEN CONCAT(" + col + ", '-01-01')"
+                + " WHEN LENGTH(" + col + ") = 7 THEN CONCAT(" + col + ", '-01')"
+                + " ELSE " + col + " END";
+        return "DATE_DIFF('year', DATE(" + padded + "), CURRENT_DATE)";
     }
 
     /** Returns {@code null} — age has no unit column; callers must guard against null. */

@@ -92,8 +92,8 @@ class SqCompatibilityTest {
         assertThat(sql).contains("FROM fhir.default.encounter t");
         assertThat(sql).doesNotContain("CROSS JOIN UNNEST");
         assertThat(sql).contains("t.class.code IN ('IMP')");
-        assertThat(sql).contains("DATE(t.periodstart) >= DATE('2024-01-01')");
-        assertThat(sql).contains("DATE(t.periodstart) <= DATE('2024-02-15')");
+        assertThat(sql).contains("DATE(FROM_ISO8601_TIMESTAMP(t.period.start)) >= DATE('2024-01-01')");
+        assertThat(sql).contains("DATE(FROM_ISO8601_TIMESTAMP(t.period.start)) <= DATE('2024-02-15')");
     }
 
     // ── MedicationAdministration ──────────────────────────────────────────────
@@ -156,8 +156,8 @@ class SqCompatibilityTest {
         var sql = translate(SQ + "MedicationRequestSQTimeRestriction.json");
 
         assertThat(sql).contains("FROM fhir.default.medicationrequest t");
-        assertThat(sql).contains("DATE(t.authoredon) >= DATE('2024-01-01')");
-        assertThat(sql).contains("DATE(t.authoredon) <= DATE('2024-02-01')");
+        assertThat(sql).contains("DATE(FROM_ISO8601_TIMESTAMP(t.authoredon)) >= DATE('2024-01-01')");
+        assertThat(sql).contains("DATE(FROM_ISO8601_TIMESTAMP(t.authoredon)) <= DATE('2024-02-01')");
     }
 
     // ── MedicationStatement ───────────────────────────────────────────────────
@@ -317,7 +317,7 @@ class SqCompatibilityTest {
 
         assertThat(sql).contains("t.id AS patient_id");
         assertThat(sql).contains("FROM fhir.default.patient t");
-        assertThat(sql).contains("DATE_DIFF('year', DATE(t.birthdate), CURRENT_DATE) = 20");
+        assertThat(sql).contains("DATE_DIFF('year', DATE(CASE WHEN LENGTH(t.birthdate) = 4 THEN CONCAT(t.birthdate, '-01-01') WHEN LENGTH(t.birthdate) = 7 THEN CONCAT(t.birthdate, '-01') ELSE t.birthdate END), CURRENT_DATE) = 20");
         // Unit 'a' has no column to compare against — must not appear as a WHERE condition
         assertThat(sql).doesNotContain("= 'a'");
         assertThat(sql).doesNotContain("SPLIT_PART");
@@ -332,7 +332,7 @@ class SqCompatibilityTest {
 
         assertThat(sql).contains("t.id AS patient_id");
         assertThat(sql).contains("FROM fhir.default.patient t");
-        assertThat(sql).contains("DATE_DIFF('year', DATE(t.birthdate), CURRENT_DATE) BETWEEN 18 AND 65");
+        assertThat(sql).contains("DATE_DIFF('year', DATE(CASE WHEN LENGTH(t.birthdate) = 4 THEN CONCAT(t.birthdate, '-01-01') WHEN LENGTH(t.birthdate) = 7 THEN CONCAT(t.birthdate, '-01') ELSE t.birthdate END), CURRENT_DATE) BETWEEN 18 AND 65");
         assertThat(sql).doesNotContain("= 'a'");
         assertThat(sql).doesNotContain("SPLIT_PART");
     }
@@ -350,7 +350,7 @@ class SqCompatibilityTest {
         assertThat(sql).contains("CROSS JOIN UNNEST(_tc1.coding) AS tc");
         assertThat(sql).contains("tc.system = 'urn:oid:2.16.840.1.113883.3.1937.777.24.5.3'");
         assertThat(sql).contains("tc.code IN ('2.16.840.1.113883.3.1937.777.24.5.3.8')");
-        assertThat(sql).contains("SPLIT_PART(t.subject.reference, '/', 2) AS patient_id");
+        assertThat(sql).contains("SPLIT_PART(t.patient.reference, '/', 2) AS patient_id");
     }
 
     // ── Diagnose ─────────────────────────────────────────────────────────────

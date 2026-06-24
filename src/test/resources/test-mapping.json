@@ -423,7 +423,7 @@
       "path": "code.coding",
       "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
     },
-    "dateFilter": { "path": "authoredon", "type": "DATE" }
+    "dateFilter": { "path": "authoredon", "type": "DATETIME" }
   },
   {
     "context": { "code": "Medikamentenanordnung", "display": "Anordnung von Medikamenten", "system": "fdpg.mii.cds", "version": "1.0.0" },
@@ -434,7 +434,7 @@
       "path": "code.coding",
       "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
     },
-    "dateFilter": { "path": "authoredon", "type": "DATE" }
+    "dateFilter": { "path": "authoredon", "type": "DATETIME" }
   },
   {
     "context": { "code": "Medikamentenverabreichung", "display": "Verabreichung von Medikamenten", "system": "fdpg.mii.cds", "version": "1.0.0" },
@@ -456,7 +456,7 @@
       "path": "code.coding",
       "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
     },
-    "dateFilter": { "path": "authoredon", "type": "DATE" }
+    "dateFilter": { "path": "authoredon", "type": "DATETIME" }
   },
   {
     "context": { "code": "Medikamentenanordnung", "display": "Anordnung von Medikamenten", "system": "fdpg.mii.cds", "version": "1.0.0" },
@@ -467,7 +467,7 @@
       "path": "code.coding",
       "join": { "table": "medication", "primaryRefPath": "medicationreference.reference", "secondaryIdPath": "id_versioned" }
     },
-    "dateFilter": { "path": "authoredon", "type": "DATE" }
+    "dateFilter": { "path": "authoredon", "type": "DATETIME" }
   },
   {
     "context": { "code": "Medikamentenverordnung", "display": "Verordnung von Medikamenten", "system": "fdpg.mii.cds", "version": "1.0.0" },
@@ -601,7 +601,7 @@
     "tableName": "encounter",
     "patientRefPath": "subject.reference",
     "termCodeFilter": { "path": "class" },
-    "dateFilter": { "path": "periodstart", "type": "DATE" },
+    "dateFilter": { "path": "period.start", "type": "DATETIME" },
     "simpleAttributeFilters": [
       { "attributeCode": "Fachabteilungsschluessel", "type": "CodeableConcept", "path": "servicetype" },
       { "attributeCode": "ErweiterterFachabteilungsschluessel", "type": "CodeableConcept", "path": "servicetype" },
@@ -627,7 +627,7 @@
     "context": { "code": "Einwilligung", "display": "Einwilligung", "system": "fdpg.mii.cds", "version": "1.0.0" },
     "key": { "code": "2.16.840.1.113883.3.1937.777.24.5.3.8", "display": "MDAT wissenschaftlich nutzen EU DSGVO NIVEAU", "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3" },
     "tableName": "consent",
-    "patientRefPath": "subject.reference",
+    "patientRefPath": "patient.reference",
     "termCodeFilter": { "path": "provision.provision.code.coding" }
   }
 ]
