@@ -20,6 +20,7 @@ def main():
     parser.add_argument("--schema", default="default", help="Trino schema (default: default)")
     parser.add_argument("--oauth", action="store_true", help="Use OAuth 2.0 authentication (implies --https)")
     parser.add_argument("--https", action="store_true", help="Use HTTPS")
+    parser.add_argument("--no-verify-ssl", action="store_true", help="Disable SSL certificate verification")
     args = parser.parse_args()
 
     sql_files = sorted(glob.glob(os.path.join(args.folder, "*.sql")))
@@ -36,6 +37,7 @@ def main():
         schema=args.schema,
         http_scheme="https" if use_https else "http",
         auth=OAuth2Authentication(redirect_auth_url_handler=ConsoleRedirectHandler()) if args.oauth else None,
+        verify=not args.no_verify_ssl,
     )
 
     name_width = max(len(os.path.splitext(os.path.basename(f))[0]) for f in sql_files)
