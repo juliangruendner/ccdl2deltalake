@@ -6,6 +6,7 @@ import glob
 import os
 import time
 
+import urllib3
 import trino
 from trino.auth import OAuth2Authentication, ConsoleRedirectHandler
 
@@ -27,6 +28,9 @@ def main():
     if not sql_files:
         print(f"No .sql files found in {args.folder}")
         return
+
+    if args.no_verify_ssl:
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     use_https = args.https or args.oauth
     conn = trino.dbapi.connect(
